@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
@@ -5,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 import '../services/auth_provider.dart';
 import '../widgets/loading_dialog.dart';
+import 'admin/rekap_absen.dart';
 import 'history.dart';
 import 'login.dart';
 import 'package:geolocator/geolocator.dart';
@@ -338,6 +341,7 @@ class DashboardScreen extends StatelessWidget {
     if (user == null) {
       return Scaffold(body: Center(child: Text('User not found')));
     }
+    log(user.role);
 
     return Scaffold(
       appBar: AppBar(
@@ -353,7 +357,7 @@ class DashboardScreen extends StatelessWidget {
         padding: EdgeInsets.all(16.0),
         child:
             user.role == 'admin'
-                ? _buildAdminDashboard()
+                ? _buildAdminDashboard(context)
                 : _buildUserDashboard(context),
       ),
     );
@@ -387,13 +391,18 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAdminDashboard() {
+  Widget _buildAdminDashboard(BuildContext context) {
     return Column(
       children: [
         Text('Selamat datang, Admin!', style: TextStyle(fontSize: 20)),
         SizedBox(height: 20),
         ElevatedButton(
-          onPressed: () {}, // Nanti isi dengan rekap absensi
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => RekapAbsenScreen()),
+            );
+          }, // Nanti isi dengan rekap absensi
           child: Text('Lihat Rekap Absensi'),
         ),
       ],

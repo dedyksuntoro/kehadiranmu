@@ -193,4 +193,87 @@ class AuthProvider with ChangeNotifier {
       return false;
     }
   }
+
+  Future<bool> fetchAllAbsensi({
+    int page = 1,
+    int limit = 10,
+    String? tanggalAwal,
+    String? tanggalAkhir,
+    String? shift,
+    String? userId,
+    String? statusTelat,
+  }) async {
+    if (!_isInitialized) await _initStorage();
+    if (_user?.token == null) return false;
+
+    if (_user!.role != 'admin') {
+      print('Access denied: User is not admin');
+      return false;
+    }
+
+    final queryParams = {
+      'page': page.toString(),
+      'limit': limit.toString(),
+      if (tanggalAwal != null) 'tanggal_awal': tanggalAwal,
+      if (tanggalAkhir != null) 'tanggal_akhir': tanggalAkhir,
+      if (shift != null) 'shift': shift,
+      if (userId != null) 'user_id': userId,
+      if (statusTelat != null) 'status_telat': statusTelat,
+    };
+    final url = Uri.parse(
+      'http://10.0.2.2/api_kehadiranmu/admin/absensi',
+    ).replace(queryParameters: queryParams);
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${_user!.token}',
+        },
+      );
+
+      print(
+        'Fetch All Absensi Response: ${response.statusCode} - ${response.body}',
+      );
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        final List<dynamic> data = jsonData['data'];
+        final newItems = data.map((item) => Absensi.fromJson(item)).toList();
+        if (page == 1) {
+          _absensiList = newItems; // Reset untuk page 1
+        } else {
+          _absensiList.addAll(newItems); // Tambah untuk infinite scroll
+        }
+        _totalPages = jsonData['total_pages'];
+        print(
+          'Parsed Absensi List Length: ${_absensiList.length}, Total Pages: $_totalPages',
+        );
+        notifyListeners();
+        return true;
+      } else if (response.statusCode == 401) {
+        if (await refreshToken()) {
+          return await fetchAllAbsensi(
+            page: page,
+            limit: limit,
+            tanggalAwal: tanggalAwal,
+            tanggalAkhir: tanggalAkhir,
+            shift: shift,
+            userId: userId,
+            statusTelat: statusTelat,
+          );
+        }
+        return false;
+      } else if (response.statusCode == 403) {
+        print('Access denied: Not an admin');
+        return false;
+      } else {
+        print('Fetch failed: ${jsonDecode(response.body)['message']}');
+        return false;
+      }
+    } catch (e) {
+      print('Error fetching absensi: $e');
+      return false;
+    }
+  }
 }
