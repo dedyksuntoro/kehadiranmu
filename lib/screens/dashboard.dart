@@ -15,8 +15,15 @@ import 'login.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  _DashboardScreenState createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  int _selectedIndex = 0; // Indeks tab yang dipilih
 
   Future<bool> _checkAndRequestPermission(BuildContext context) async {
     try {
@@ -335,98 +342,117 @@ class DashboardScreen extends StatelessWidget {
     if (user == null) {
       return Scaffold(body: Center(child: Text('User not found')));
     }
-    log(user.role);
+    log('User Role: ${user.role}');
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Dashboard - Kehadiranmu'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () => _showLogoutDialog(context),
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child:
-            user.role == 'admin'
-                ? _buildAdminDashboard(context)
-                : _buildUserDashboard(context),
-      ),
+      body:
+          user.role == 'admin'
+              ? _buildAdminDashboard(context, _selectedIndex)
+              : _buildUserDashboard(context, _selectedIndex),
+      bottomNavigationBar:
+          user.role == 'admin'
+              ? _buildAdminBottomNavBar()
+              : _buildUserBottomNavBar(),
     );
   }
 
-  Widget _buildUserDashboard(BuildContext context) {
-    return Column(
-      children: [
-        Text('Selamat datang, Karyawan!', style: TextStyle(fontSize: 20)),
-        SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () => _absenMasuk(context),
-          child: Text('Absen Masuk'),
+  Widget _buildAdminDashboard(BuildContext context, int index) {
+    final List<Widget> adminPages = [
+      // Tab 0: Rekap Absensi
+      RekapAbsenScreen(),
+      // Tab 1: Kelola Shift
+      ShiftScreen(),
+      // Tab 2: Kelola Lokasi
+      LokasiScreen(),
+      // Tab 3: Kelola Karyawan
+      EmployeeManagementScreen(),
+      // Tab 4: Logout (Placeholder)
+      Center(child: Text('Logout akan ditangani di BottomNavBar')),
+    ];
+
+    return adminPages[index];
+  }
+
+  BottomNavigationBar _buildAdminBottomNavBar() {
+    return BottomNavigationBar(
+      currentIndex: _selectedIndex,
+      onTap: (index) {
+        if (index == 4) {
+          // Indeks 4 adalah Logout
+          _showLogoutDialog(context);
+        } else {
+          setState(() {
+            _selectedIndex = index;
+          });
+        }
+      },
+      type: BottomNavigationBarType.fixed, // Untuk lebih dari 3 item
+      items: [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.history),
+          label: 'Rekap Absensi',
         ),
-        SizedBox(height: 10),
-        ElevatedButton(
-          onPressed: () => _absenKeluar(context),
-          child: Text('Absen Keluar'),
-        ),
-        SizedBox(height: 10),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => HistoryScreen()),
-            );
-          },
-          child: Text('Lihat Riwayat Absensi'),
+        BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Shift'),
+        BottomNavigationBarItem(icon: Icon(Icons.location_on), label: 'Lokasi'),
+        BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Karyawan'),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.logout, color: Colors.red),
+          label: 'Logout',
         ),
       ],
     );
   }
 
-  Widget _buildAdminDashboard(BuildContext context) {
-    return Column(
-      children: [
-        Text('Selamat datang, Admin!', style: TextStyle(fontSize: 20)),
-        SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => RekapAbsenScreen()),
-            );
-          },
-          child: Text('Lihat Rekap Absensi'),
+  Widget _buildUserDashboard(BuildContext context, int index) {
+    final List<Widget> userPages = [
+      // Tab 0: Absen
+      Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Selamat Datang, Karyawan!', style: TextStyle(fontSize: 20)),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => _absenMasuk(context),
+              child: Text('Absen Masuk'),
+            ),
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () => _absenKeluar(context),
+              child: Text('Absen Keluar'),
+            ),
+          ],
         ),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ShiftScreen()),
-            );
-          },
-          child: Text('Kelola Shift'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => LokasiScreen()),
-            );
-          },
-          child: Text('Kelola Lokasi'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => EmployeeManagementScreen(),
-              ),
-            );
-          },
-          child: Text('Kelola Karyawan'),
+      ),
+      // Tab 1: Riwayat Absensi
+      HistoryScreen(),
+      // Tab 2: Logout (Placeholder)
+      Center(child: Text('Logout akan ditangani di BottomNavBar')),
+    ];
+
+    return userPages[index];
+  }
+
+  BottomNavigationBar _buildUserBottomNavBar() {
+    return BottomNavigationBar(
+      currentIndex: _selectedIndex,
+      onTap: (index) {
+        if (index == 2) {
+          // Indeks 2 adalah Logout
+          _showLogoutDialog(context);
+        } else {
+          setState(() {
+            _selectedIndex = index;
+          });
+        }
+      },
+      items: [
+        BottomNavigationBarItem(icon: Icon(Icons.fingerprint), label: 'Absen'),
+        BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Riwayat'),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.logout, color: Colors.red),
+          label: 'Logout',
         ),
       ],
     );
