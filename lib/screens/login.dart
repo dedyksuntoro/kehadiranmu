@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import '../services/auth_provider.dart';
 import '../models/user.dart';
-import '../widgets/loading_dialog.dart'; // Import loading_dialog.dart
+import '../widgets/loading_dialog.dart';
 import 'dashboard.dart';
+import 'register.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -23,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final url = Uri.parse('http://10.0.2.2/api_kehadiranmu/auth/login');
 
-    showLoadingDialog(context, 'Sedang login...'); // Gunakan fungsi umum
+    showLoadingDialog(context, 'Sedang login...');
     try {
       final response = await http.post(
         url,
@@ -38,19 +40,27 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pop(context); // Tutup loading
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        final accessToken = data['access_token'];
+        final refreshToken = data['refresh_token'];
+
+        // Dekode access_token untuk mendapatkan data user
+        Map<String, dynamic> decodedToken = JwtDecoder.decode(accessToken);
+        final userData = decodedToken['data'];
+
         final user = User(
-          id: data['id'] ?? 0,
-          email: _emailController.text,
-          role: data['role'] ?? 'karyawan',
-          token: data['access_token'],
-          refreshToken: data['refresh_token'],
+          id: userData['id'].toString(), // Pastikan jadi String
+          email: userData['email'],
+          role: userData['role'],
+          token: accessToken,
+          refreshToken: refreshToken,
         );
+
         print(
-          'Login - Token: ${user.token}, Refresh Token: ${user.refreshToken}',
+          'Login - ID: ${user.id}, Email: ${user.email}, Role: ${user.role}, Token: ${user.token}, Refresh Token: ${user.refreshToken}',
         );
         await authProvider.setUser(user);
         print(
-          'Login - User after save: ${authProvider.user?.email}, Token: ${authProvider.user?.token}, Refresh: ${authProvider.user?.refreshToken}',
+          'Login - User after save: ${authProvider.user?.email}, Role: ${authProvider.user?.role}, Token: ${authProvider.user?.token}',
         );
 
         Navigator.pushReplacement(
@@ -64,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
         });
       }
     } catch (e) {
-      Navigator.pop(context); // Tutup loading kalau error
+      Navigator.pop(context);
       setState(() {
         _errorMessage = 'Error: $e';
       });
@@ -97,6 +107,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 padding: EdgeInsets.only(top: 10),
                 child: Text(_errorMessage, style: TextStyle(color: Colors.red)),
               ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RegisterScreen()),
+                );
+              },
+              child: Text('Belum punya akun? Daftar di sini'),
+            ),
           ],
         ),
       ),

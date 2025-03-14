@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:dropdown_search/dropdown_search.dart';
+import '../../models/user_all.dart';
 import '../../services/auth_provider.dart';
 import '../../widgets/loading_dialog.dart';
 
@@ -15,11 +17,16 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
   bool _isLoadingMore = false;
   DateTime? _startDate;
   DateTime? _endDate;
+  String? _selectedShift;
+  UserAll? _selectedUser; // Ganti _userId jadi UserAll
+  String? _selectedStatusTelat;
 
   @override
   void initState() {
     super.initState();
     Future.delayed(Duration.zero, () {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      authProvider.fetchUsers(); // Ambil daftar karyawan saat init
       _fetchRekap();
     });
     _scrollController.addListener(() {
@@ -42,6 +49,9 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
               : null,
       tanggalAkhir:
           _endDate != null ? DateFormat('yyyy-MM-dd').format(_endDate!) : null,
+      shift: _selectedShift,
+      userId: _selectedUser != null ? int.parse(_selectedUser!.id) : null,
+      statusTelat: _selectedStatusTelat,
     );
     if (!isRefresh) Navigator.pop(context);
     if (!success) {
@@ -69,6 +79,9 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
             _endDate != null
                 ? DateFormat('yyyy-MM-dd').format(_endDate!)
                 : null,
+        shift: _selectedShift,
+        userId: _selectedUser != null ? int.parse(_selectedUser!.id) : null,
+        statusTelat: _selectedStatusTelat,
       );
       setState(() {
         _isLoadingMore = false;
@@ -104,6 +117,127 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
     }
   }
 
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        String? tempShift = _selectedShift;
+        UserAll? tempUser = _selectedUser;
+        String? tempStatusTelat = _selectedStatusTelat;
+
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: Text('Filter Rekap Absensi'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      value: tempShift,
+                      decoration: InputDecoration(labelText: 'Shift'),
+                      items:
+                          ['pagi', 'siang', 'malam']
+                              .map(
+                                (shift) => DropdownMenuItem(
+                                  value: shift,
+                                  child: Text(shift.capitalize()),
+                                ),
+                              )
+                              .toList(),
+                      onChanged: (value) {
+                        setStateDialog(() {
+                          tempShift = value;
+                        });
+                      },
+                    ),
+                    SizedBox(height: 10),
+                    Consumer<AuthProvider>(
+                      builder: (context, authProvider, child) {
+                        return DropdownSearch<UserAll>(
+                          popupProps: PopupProps.menu(
+                            showSearchBox: true,
+                            searchFieldProps: TextFieldProps(
+                              decoration: InputDecoration(
+                                labelText: 'Cari Karyawan',
+                              ),
+                            ),
+                          ),
+                          items: authProvider.userList,
+                          dropdownDecoratorProps: DropDownDecoratorProps(
+                            dropdownSearchDecoration: InputDecoration(
+                              labelText: 'Karyawan',
+                            ),
+                          ),
+                          onChanged: (value) {
+                            setStateDialog(() {
+                              tempUser = value;
+                            });
+                          },
+                          selectedItem: tempUser,
+                          itemAsString: (user) => user.nama,
+                        );
+                      },
+                    ),
+                    SizedBox(height: 10),
+                    DropdownButtonFormField<String>(
+                      value: tempStatusTelat,
+                      decoration: InputDecoration(labelText: 'Status Telat'),
+                      items:
+                          ['telat', 'tepat waktu']
+                              .map(
+                                (status) => DropdownMenuItem(
+                                  value: status,
+                                  child: Text(status.capitalize()),
+                                ),
+                              )
+                              .toList(),
+                      onChanged: (value) {
+                        setStateDialog(() {
+                          tempStatusTelat = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedShift = null;
+                      _selectedUser = null;
+                      _selectedStatusTelat = null;
+                    });
+                    Navigator.pop(context);
+                    _fetchRekap(isRefresh: false);
+                  },
+                  child: Text('Reset'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Batal'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedShift = tempShift;
+                      _selectedUser = tempUser;
+                      _selectedStatusTelat = tempStatusTelat;
+                    });
+                    Navigator.pop(context);
+                    _fetchRekap(isRefresh: false);
+                  },
+                  child: Text('Terapkan'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
@@ -113,10 +247,14 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
         title: Text('Rekap Absensi (Admin)'),
         actions: [
           IconButton(icon: Icon(Icons.date_range), onPressed: _selectDateRange),
+          IconButton(
+            icon: Icon(Icons.filter_list),
+            onPressed: _showFilterDialog,
+          ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () => _fetchRekap(isRefresh: true),
+        onRefresh: () => _fetchRekap(isRefresh: false),
         child:
             authProvider.absensiList.isEmpty
                 ? SingleChildScrollView(
@@ -147,12 +285,13 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
                     return Card(
                       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                       child: ListTile(
-                        title: Text(
-                          'User ID: ${absensi.userId} - ${dateFormat.format(DateTime.parse(absensi.tanggal))}',
-                        ),
+                        title: Text('${absensi.namaKaryawan}'),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Text(
+                              'Tanggal: ${dateFormat.format(DateTime.parse(absensi.tanggal))}',
+                            ),
                             Text(
                               'Shift: ${absensi.shift} (${dateFormat.format(DateTime.parse(absensi.tanggalShift))})',
                             ),
@@ -163,7 +302,9 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
                               'Keluar: ${absensi.waktuKeluar != null ? timeFormat.format(absensi.waktuKeluar!) : "Belum absen"}',
                             ),
                             Text('Lokasi Masuk: ${absensi.lokasiMasuk}'),
-                            Text('Lokasi Keluar: ${absensi.lokasiKeluar}'),
+                            Text(
+                              'Lokasi Keluar: ${absensi.lokasiKeluar ?? "Belum absen"}',
+                            ),
                             Text('Status: ${absensi.statusTelat}'),
                           ],
                         ),
@@ -179,5 +320,11 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+}
+
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${substring(1)}";
   }
 }

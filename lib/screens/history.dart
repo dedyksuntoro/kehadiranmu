@@ -264,7 +264,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   ),
                               ],
                             ),
-                            Text('Status: ${absensi.statusTelat}'),
+                            Text(
+                              'Status: ${absensi.statusTelat ?? "Tidak diketahui"}',
+                            ),
                           ],
                         ),
                         trailing:

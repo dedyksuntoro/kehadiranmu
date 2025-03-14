@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
@@ -7,7 +6,10 @@ import 'dart:convert';
 import 'dart:io';
 import '../services/auth_provider.dart';
 import '../widgets/loading_dialog.dart';
+import 'admin/lokasi.dart';
 import 'admin/rekap_absen.dart';
+import 'admin/shift.dart';
+import 'admin/employee.dart';
 import 'history.dart';
 import 'login.dart';
 import 'package:geolocator/geolocator.dart';
@@ -16,7 +18,6 @@ import 'package:image_picker/image_picker.dart';
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
-  // Fungsi untuk cek dan minta izin lokasi
   Future<bool> _checkAndRequestPermission(BuildContext context) async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -58,12 +59,9 @@ class DashboardScreen extends StatelessWidget {
     }
   }
 
-  // Fungsi untuk ambil lokasi
   Future<Position?> _getCurrentLocation(BuildContext context) async {
     bool permissionGranted = await _checkAndRequestPermission(context);
-    if (!permissionGranted) {
-      return null;
-    }
+    if (!permissionGranted) return null;
 
     try {
       return await Geolocator.getCurrentPosition(
@@ -78,18 +76,15 @@ class DashboardScreen extends StatelessWidget {
     }
   }
 
-  // Fungsi untuk ambil foto
   Future<File?> _pickImage(BuildContext context) async {
     final picker = ImagePicker();
     try {
       final pickedFile = await picker.pickImage(
         source: ImageSource.camera,
-        maxWidth: 800, // Kompres ukuran
+        maxWidth: 800,
         maxHeight: 800,
       );
-      if (pickedFile != null) {
-        return File(pickedFile.path);
-      }
+      if (pickedFile != null) return File(pickedFile.path);
       return null;
     } catch (e) {
       ScaffoldMessenger.of(
@@ -202,7 +197,7 @@ class DashboardScreen extends StatelessWidget {
       return;
     }
 
-    showLoadingDialog(context, 'Memproses absen...'); // Gunakan fungsi umum
+    showLoadingDialog(context, 'Memproses absen...');
     final position = await _getCurrentLocation(context);
     if (position == null) {
       Navigator.pop(context);
@@ -254,11 +249,10 @@ class DashboardScreen extends StatelessWidget {
           _handleTokenExpired(context);
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal: ${jsonDecode(response.body)['message']}'),
-          ),
-        );
+        final errorMessage = jsonDecode(response.body)['message'];
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(errorMessage)));
       }
     } catch (e) {
       Navigator.pop(context);
@@ -280,7 +274,7 @@ class DashboardScreen extends StatelessWidget {
       return;
     }
 
-    showLoadingDialog(context, 'Memproses absen...'); // Gunakan fungsi umum
+    showLoadingDialog(context, 'Memproses absen...');
     final position = await _getCurrentLocation(context);
     if (position == null) {
       Navigator.pop(context);
@@ -402,8 +396,37 @@ class DashboardScreen extends StatelessWidget {
               context,
               MaterialPageRoute(builder: (_) => RekapAbsenScreen()),
             );
-          }, // Nanti isi dengan rekap absensi
+          },
           child: Text('Lihat Rekap Absensi'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ShiftScreen()),
+            );
+          },
+          child: Text('Kelola Shift'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => LokasiScreen()),
+            );
+          },
+          child: Text('Kelola Lokasi'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => EmployeeManagementScreen(),
+              ),
+            );
+          },
+          child: Text('Kelola Karyawan'),
         ),
       ],
     );
