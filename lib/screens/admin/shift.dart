@@ -5,6 +5,8 @@ import '../../widgets/loading_dialog.dart';
 import '../../models/shift.dart';
 
 class ShiftScreen extends StatefulWidget {
+  const ShiftScreen({super.key});
+
   @override
   _ShiftScreenState createState() => _ShiftScreenState();
 }
@@ -20,7 +22,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
 
   Future<void> _fetchShifts() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    showLoadingDialog(context, 'Memuat daftar shift...');
+    showLoadingDialog(context, 'Memproses data...');
     final success = await authProvider.fetchShifts();
     Navigator.pop(context);
     if (!success) {
@@ -126,7 +128,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
                 );
                 showLoadingDialog(
                   context,
-                  shift == null ? 'Membuat shift...' : 'Memperbarui shift...',
+                  shift == null ? 'Menambahkan shift...' : 'Memperbarui shift...',
                 );
                 bool success;
                 if (shift == null) {
@@ -231,14 +233,22 @@ class _ShiftScreenState extends State<ShiftScreen> {
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Daftar Shift (Admin)')),
+      appBar: AppBar(
+        title: Text('Daftar Shift (Admin)'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () => _showShiftDialog(),
+          ),
+        ],
+      ),
       body: RefreshIndicator(
         onRefresh: _fetchShifts,
         child:
             authProvider.shiftList.isEmpty
                 ? SingleChildScrollView(
                   physics: AlwaysScrollableScrollPhysics(),
-                  child: Container(
+                  child: SizedBox(
                     height:
                         MediaQuery.of(context).size.height -
                         kToolbarHeight -
@@ -279,10 +289,6 @@ class _ShiftScreenState extends State<ShiftScreen> {
                     );
                   },
                 ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showShiftDialog(),
-        child: Icon(Icons.add),
       ),
     );
   }

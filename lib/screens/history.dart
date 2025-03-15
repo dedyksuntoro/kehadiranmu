@@ -37,7 +37,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Future<void> _fetchAbsensi({bool isRefresh = false}) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    if (!isRefresh) showLoadingDialog(context, 'Memuat riwayat absensi...');
+    if (!isRefresh) showLoadingDialog(context, 'Memproses data...');
     final success = await authProvider.fetchAbsensi(
       page: isRefresh ? 1 : _currentPage,
       startDate:
@@ -167,10 +167,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
         _startDate = picked.start;
         _endDate = picked.end;
       });
-      showLoadingDialog(context, 'Memuat data absensi berdasarkan tanggal...');
+      showLoadingDialog(context, 'Memproses data...');
       await _fetchAbsensi(isRefresh: true);
       Navigator.pop(context); // Tutup loading setelah selesai
     }
+  }
+
+  void _clearDateRange() {
+    setState(() {
+      _startDate = null;
+      _endDate = null;
+    });
+    showLoadingDialog(context, 'Memproses data...');
+    _fetchAbsensi(isRefresh: true).then((_) => Navigator.pop(context));
   }
 
   @override
@@ -181,7 +190,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
       appBar: AppBar(
         title: Text('Riwayat Absensi'),
         actions: [
-          IconButton(icon: Icon(Icons.date_range), onPressed: _selectDateRange),
+          if (_startDate != null || _endDate != null)
+            IconButton(
+              icon: Icon(Icons.clear),
+              onPressed:
+                  (_startDate != null || _endDate != null)
+                      ? _clearDateRange
+                      : null, // Disable jika tidak ada filter
+              tooltip: 'Hapus Filter',
+            ),
+          IconButton(
+            icon: Icon(Icons.date_range),
+            onPressed: _selectDateRange,
+            tooltip: 'Filter Tanggal',
+          ),
         ],
       ),
       body: RefreshIndicator(
@@ -200,8 +222,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 )
                 : ListView.builder(
                   controller: _scrollController,
-                  physics:
-                      AlwaysScrollableScrollPhysics(), // Pastikan selalu bisa scroll
+                  physics: AlwaysScrollableScrollPhysics(),
                   itemCount:
                       authProvider.absensiList.length +
                       (_isLoadingMore ? 1 : 0),
@@ -218,14 +239,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                       child: ListTile(
                         title: Text(
-                          'Tanggal: ${dateFormat.format(DateTime.parse(absensi.tanggal))}',
+                          dateFormat.format(DateTime.parse(absensi.tanggal)),
                         ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Shift: ${absensi.shift} (${dateFormat.format(DateTime.parse(absensi.tanggalShift))})',
-                            ),
+                            Text('Shift: ${absensi.shift.capitalize()}'),
                             Text(
                               'Masuk: ${absensi.waktuMasuk != null ? timeFormat.format(absensi.waktuMasuk!) : "Belum absen"}',
                             ),
@@ -234,10 +253,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             ),
                             Row(
                               children: [
-                                Text('Lokasi Masuk: ${absensi.lokasiMasuk} '),
-                                IconButton(
-                                  icon: Icon(Icons.map, size: 20),
-                                  onPressed:
+                                GestureDetector(
+                                  child: Text(
+                                    'Lokasi Masuk: ${absensi.lokasiMasuk} ',
+                                  ),
+                                  onTap:
                                       () => _showMapDialog(
                                         context,
                                         absensi.latitude,
@@ -249,12 +269,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             ),
                             Row(
                               children: [
-                                Text('Lokasi Keluar: ${absensi.lokasiKeluar} '),
+                                if (absensi.latitudeKeluar == null &&
+                                    absensi.longitudeKeluar == null)
+                                  Text(
+                                    'Lokasi Keluar: ${absensi.lokasiKeluar} ',
+                                  ),
                                 if (absensi.latitudeKeluar != null &&
                                     absensi.longitudeKeluar != null)
-                                  IconButton(
-                                    icon: Icon(Icons.map, size: 20),
-                                    onPressed:
+                                  GestureDetector(
+                                    child: Text(
+                                      'Lokasi Keluar: ${absensi.lokasiKeluar} ',
+                                    ),
+                                    onTap:
                                         () => _showMapDialog(
                                           context,
                                           absensi.latitudeKeluar!,
@@ -265,7 +291,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               ],
                             ),
                             Text(
-                              'Status: ${absensi.statusTelat ?? "Tidak diketahui"}',
+                              'Status: ${absensi.statusTelat.capitalize() ?? "Tidak diketahui"}',
                             ),
                           ],
                         ),
@@ -293,5 +319,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+}
+
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${substring(1)}";
   }
 }

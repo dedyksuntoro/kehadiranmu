@@ -49,6 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         final user = User(
           id: userData['id'].toString(), // Pastikan jadi String
+          nama: userData['nama'],
           email: userData['email'],
           role: userData['role'],
           token: accessToken,
@@ -88,6 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(

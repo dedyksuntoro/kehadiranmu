@@ -5,6 +5,8 @@ import '../../models/user_all.dart';
 import '../../widgets/loading_dialog.dart';
 
 class EmployeeManagementScreen extends StatefulWidget {
+  const EmployeeManagementScreen({super.key});
+
   @override
   _EmployeeManagementScreenState createState() =>
       _EmployeeManagementScreenState();
@@ -30,7 +32,7 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     showLoadingDialog(
       context,
-      'Memuat data karyawan...',
+      'Memproses data...',
     ); // Tampilkan dialog loading
     final success = await authProvider.fetchUsers(role: _selectedRoleFilter);
     if (mounted) {
@@ -45,7 +47,7 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
 
   Future<void> _applyFilter({bool isRefresh = false}) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    if (!isRefresh) showLoadingDialog(context, 'Memuat data karyawan...');
+    if (!isRefresh) showLoadingDialog(context, 'Memproses data...');
     final success = await authProvider.fetchUsers(
       nama: _namaFilterController.text,
       role: _selectedRoleFilter,
@@ -358,7 +360,7 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: () {
-          showLoadingDialog(context, 'Memuat data karyawan...');
+          showLoadingDialog(context, 'Memproses data...');
           return authProvider
               .fetchUsers(
                 nama: _namaFilterController.text,
@@ -370,7 +372,7 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
             authProvider.userList.isEmpty
                 ? SingleChildScrollView(
                   physics: AlwaysScrollableScrollPhysics(),
-                  child: Container(
+                  child: SizedBox(
                     height:
                         MediaQuery.of(context).size.height -
                         kToolbarHeight -

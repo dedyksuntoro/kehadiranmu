@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -22,8 +23,31 @@ class DashboardScreen extends StatefulWidget {
   _DashboardScreenState createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen>
+    with TickerProviderStateMixin {
   int _selectedIndex = 0; // Indeks tab yang dipilih
+  late AnimationController _masukController; // Untuk tombol Absen Masuk
+  late AnimationController _keluarController; // Untuk tombol Absen Keluar
+
+  @override
+  void initState() {
+    super.initState();
+    _masukController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 200),
+    );
+    _keluarController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 200),
+    );
+  }
+
+  @override
+  void dispose() {
+    _masukController.dispose();
+    _keluarController.dispose();
+    super.dispose();
+  }
 
   Future<bool> _checkAndRequestPermission(BuildContext context) async {
     try {
@@ -204,7 +228,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       return;
     }
 
-    showLoadingDialog(context, 'Memproses absen...');
+    showLoadingDialog(context, 'Memproses data...');
     final position = await _getCurrentLocation(context);
     if (position == null) {
       Navigator.pop(context);
@@ -281,7 +305,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       return;
     }
 
-    showLoadingDialog(context, 'Memproses absen...');
+    showLoadingDialog(context, 'Memproses data...');
     final position = await _getCurrentLocation(context);
     if (position == null) {
       Navigator.pop(context);
@@ -342,7 +366,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (user == null) {
       return Scaffold(body: Center(child: Text('User not found')));
     }
-    log('User Role: ${user.role}');
 
     return Scaffold(
       body:
@@ -358,18 +381,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildAdminDashboard(BuildContext context, int index) {
     final List<Widget> adminPages = [
-      // Tab 0: Rekap Absensi
       RekapAbsenScreen(),
-      // Tab 1: Kelola Shift
       ShiftScreen(),
-      // Tab 2: Kelola Lokasi
       LokasiScreen(),
-      // Tab 3: Kelola Karyawan
       EmployeeManagementScreen(),
-      // Tab 4: Logout (Placeholder)
       Center(child: Text('Logout akan ditangani di BottomNavBar')),
     ];
-
     return adminPages[index];
   }
 
@@ -378,7 +395,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       currentIndex: _selectedIndex,
       onTap: (index) {
         if (index == 4) {
-          // Indeks 4 adalah Logout
           _showLogoutDialog(context);
         } else {
           setState(() {
@@ -386,12 +402,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           });
         }
       },
-      type: BottomNavigationBarType.fixed, // Untuk lebih dari 3 item
+      type: BottomNavigationBarType.fixed,
       items: [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.history),
-          label: 'Rekap Absensi',
-        ),
+        BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Absensi'),
         BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Shift'),
         BottomNavigationBarItem(icon: Icon(Icons.location_on), label: 'Lokasi'),
         BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Karyawan'),
@@ -404,25 +417,143 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildUserDashboard(BuildContext context, int index) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final user = authProvider.user!;
+    final double screenWidth =
+        MediaQuery.of(context).size.width; // Ambil lebar layar
+    final double dynamicPadding = screenWidth; // 5% dari lebar layar
+    final double maxPadding = 32.0; // Batas maksimum padding
+    final double minPadding = 16.0; // Batas minimum padding
+    final double responsivePadding = dynamicPadding.clamp(
+      minPadding,
+      maxPadding,
+    ); // Batasi rentang
+
     final List<Widget> userPages = [
       // Tab 0: Absen
-      Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('Selamat Datang, Karyawan!', style: TextStyle(fontSize: 20)),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => _absenMasuk(context),
-              child: Text('Absen Masuk'),
-            ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () => _absenKeluar(context),
-              child: Text('Absen Keluar'),
-            ),
-          ],
+      Container(
+        // decoration: BoxDecoration(
+        //   gradient: LinearGradient(
+        //     colors: [Colors.grey.shade300, Colors.white],
+        //     begin: Alignment.topLeft,
+        //     end: Alignment.bottomRight,
+        //   ),
+        // ),
+        child: Padding(
+          padding: EdgeInsets.all(responsivePadding), // Gunakan padding dinamis
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                user.nama,
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center, // Teks tetap center di dalam batas
+                overflow:
+                    TextOverflow
+                        .ellipsis, // Tambah ellipsis jika terlalu panjang
+              ),
+              SizedBox(
+                height: responsivePadding * 0.025,
+              ), // Sesuaikan jarak dengan padding (10/16)
+              StreamBuilder(
+                stream: Stream.periodic(Duration(seconds: 1)),
+                builder: (context, snapshot) {
+                  return Text(
+                    'Waktu saat ini: ${DateFormat('HH:mm:ss').format(DateTime.now())}',
+                    style: TextStyle(fontSize: 16),
+                  );
+                },
+              ),
+              SizedBox(height: responsivePadding * 1.5), // 40/16 = 2.5x padding
+              GestureDetector(
+                onTapDown: (_) => _masukController.forward(),
+                onTapUp:
+                    (_) => _masukController.reverse().then(
+                      (_) => _absenMasuk(context),
+                    ),
+                onTapCancel: () => _masukController.reverse(),
+                child: ScaleTransition(
+                  scale: Tween<double>(
+                    begin: 1.0,
+                    end: 0.95,
+                  ).animate(_masukController),
+                  child: Card(
+                    elevation: 8,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: responsivePadding * 1.25,
+                        horizontal: responsivePadding * 2.5,
+                      ), // 20/16 = 1.25, 40/16 = 2.5
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.login, color: Colors.blue),
+                          SizedBox(width: responsivePadding * 0.625), // 10/16
+                          Text(
+                            'Absen Masuk',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: responsivePadding * 1.25), // 20/16
+              GestureDetector(
+                onTapDown: (_) => _keluarController.forward(),
+                onTapUp:
+                    (_) => _keluarController.reverse().then(
+                      (_) => _absenKeluar(context),
+                    ),
+                onTapCancel: () => _keluarController.reverse(),
+                child: ScaleTransition(
+                  scale: Tween<double>(
+                    begin: 1.0,
+                    end: 0.95,
+                  ).animate(_keluarController),
+                  child: Card(
+                    elevation: 8,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: responsivePadding * 1.25,
+                        horizontal: responsivePadding * 2.5,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.logout, color: Colors.red),
+                          SizedBox(width: responsivePadding * 0.625),
+                          Text(
+                            'Absen Keluar',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: responsivePadding * 2.5), // 40/16
+              Text(
+                'Silakan absen untuk memulai atau mengakhiri hari ini!',
+                style: TextStyle(fontSize: 15),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
       // Tab 1: Riwayat Absensi
@@ -439,7 +570,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       currentIndex: _selectedIndex,
       onTap: (index) {
         if (index == 2) {
-          // Indeks 2 adalah Logout
           _showLogoutDialog(context);
         } else {
           setState(() {

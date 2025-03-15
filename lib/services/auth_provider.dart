@@ -41,6 +41,7 @@ class AuthProvider with ChangeNotifier {
     if (!_isInitialized) await _initStorage();
     _user = user;
     await _storage.setString('id', user.id, notify: false); // Sudah String
+    await _storage.setString('nama', user.nama, notify: false);
     await _storage.setString('email', user.email, notify: false);
     await _storage.setString('role', user.role, notify: false);
     await _storage.setString('token', user.token, notify: false);
@@ -391,6 +392,7 @@ class AuthProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         _user = User(
           id: _user!.id,
+          nama: _user!.nama,
           email: _user!.email,
           role: _user!.role,
           token: data['access_token'],
@@ -415,6 +417,7 @@ class AuthProvider with ChangeNotifier {
     print('Starting loadUser...');
     try {
       final id = _storage.getString('id');
+      final nama = _storage.getString('nama');
       final email = _storage.getString('email');
       final role = _storage.getString('role');
       final token = _storage.getString('token');
@@ -423,10 +426,15 @@ class AuthProvider with ChangeNotifier {
       print(
         'LoadUser - ID: $id, Email: $email, Role: $role, Token: $token, Refresh: $refreshToken',
       );
-      if (id != null && email != null && role != null && token != null) {
+      if (id != null &&
+          nama != null &&
+          email != null &&
+          role != null &&
+          token != null) {
         // refreshToken optional
         _user = User(
           id: id,
+          nama: nama,
           email: email,
           role: role,
           token: token,

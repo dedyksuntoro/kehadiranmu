@@ -9,6 +9,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class LokasiScreen extends StatefulWidget {
+  const LokasiScreen({super.key});
+
   @override
   _LokasiScreenState createState() => _LokasiScreenState();
 }
@@ -24,7 +26,7 @@ class _LokasiScreenState extends State<LokasiScreen> {
 
   Future<void> _fetchLokasi() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    showLoadingDialog(context, 'Memuat daftar lokasi...');
+    showLoadingDialog(context, 'Memproses data...');
     final success = await authProvider.fetchLokasi();
     Navigator.pop(context);
     if (!success) {
@@ -152,7 +154,7 @@ class _LokasiScreenState extends State<LokasiScreen> {
                 showLoadingDialog(
                   context,
                   lokasi == null
-                      ? 'Membuat lokasi...'
+                      ? 'Menambahkan lokasi...'
                       : 'Memperbarui lokasi...',
                 );
                 bool success;
@@ -385,14 +387,22 @@ class _LokasiScreenState extends State<LokasiScreen> {
     final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Daftar Lokasi (Admin)')),
+      appBar: AppBar(
+        title: Text('Daftar Lokasi (Admin)'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () => _showLokasiDialog(),
+          ),
+        ],
+      ),
       body: RefreshIndicator(
         onRefresh: _fetchLokasi,
         child:
             authProvider.lokasiList.isEmpty
                 ? SingleChildScrollView(
                   physics: AlwaysScrollableScrollPhysics(),
-                  child: Container(
+                  child: SizedBox(
                     height:
                         MediaQuery.of(context).size.height -
                         kToolbarHeight -
@@ -435,10 +445,6 @@ class _LokasiScreenState extends State<LokasiScreen> {
                     );
                   },
                 ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showLokasiDialog(),
-        child: Icon(Icons.add),
       ),
     );
   }

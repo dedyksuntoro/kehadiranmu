@@ -7,6 +7,8 @@ import '../../services/auth_provider.dart';
 import '../../widgets/loading_dialog.dart';
 
 class RekapAbsenScreen extends StatefulWidget {
+  const RekapAbsenScreen({super.key});
+
   @override
   _RekapAbsenScreenState createState() => _RekapAbsenScreenState();
 }
@@ -40,7 +42,7 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
 
   Future<void> _fetchRekap({bool isRefresh = false}) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    if (!isRefresh) showLoadingDialog(context, 'Memuat rekap absensi...');
+    if (!isRefresh) showLoadingDialog(context, 'Memproses data...');
     final success = await authProvider.fetchAllAbsensi(
       page: isRefresh ? 1 : _currentPage,
       tanggalAwal:
@@ -111,7 +113,7 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
         _startDate = picked.start;
         _endDate = picked.end;
       });
-      showLoadingDialog(context, 'Memuat rekap absensi berdasarkan tanggal...');
+      showLoadingDialog(context, 'Memproses data...');
       await _fetchRekap(isRefresh: true);
       Navigator.pop(context);
     }
@@ -259,7 +261,7 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
             authProvider.absensiList.isEmpty
                 ? SingleChildScrollView(
                   physics: AlwaysScrollableScrollPhysics(),
-                  child: Container(
+                  child: SizedBox(
                     height:
                         MediaQuery.of(context).size.height -
                         kToolbarHeight -
@@ -285,7 +287,7 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
                     return Card(
                       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                       child: ListTile(
-                        title: Text('${absensi.namaKaryawan}'),
+                        title: Text(absensi.namaKaryawan),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
