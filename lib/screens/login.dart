@@ -23,7 +23,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final url = Uri.parse('http://10.0.2.2/api_kehadiranmu/auth/login');
+    final url = Uri.parse(
+      'https://mbl.nipstudio.id/api_kehadiranmu/auth/login',
+    );
 
     showLoadingDialog(context, 'Sedang login...');
     try {

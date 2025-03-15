@@ -131,7 +131,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     String token,
   ) async {
     final url = Uri.parse(
-      'http://10.0.2.2/api_kehadiranmu/absensi/upload-foto',
+      'https://mbl.nipstudio.id/api_kehadiranmu/absensi/upload-foto',
     );
     try {
       var request =
@@ -247,7 +247,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       return;
     }
 
-    final url = Uri.parse('http://10.0.2.2/api_kehadiranmu/absensi');
+    final url = Uri.parse('https://mbl.nipstudio.id/api_kehadiranmu/absensi');
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
@@ -312,7 +312,9 @@ class _DashboardScreenState extends State<DashboardScreen>
       return;
     }
 
-    final url = Uri.parse('http://10.0.2.2/api_kehadiranmu/absensi/keluar');
+    final url = Uri.parse(
+      'https://mbl.nipstudio.id/api_kehadiranmu/absensi/keluar',
+    );
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',

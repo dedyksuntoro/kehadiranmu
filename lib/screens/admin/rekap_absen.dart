@@ -55,8 +55,10 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
       userId: _selectedUser != null ? int.parse(_selectedUser!.id) : null,
       statusTelat: _selectedStatusTelat,
     );
-    if (!isRefresh) Navigator.pop(context);
-    if (!success) {
+    if (!isRefresh && mounted)
+      Navigator.pop(context); // Tambah pengecekan mounted
+    if (!success && mounted) {
+      // Tambah mounted di sini juga
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Gagal memuat rekap absensi')));
@@ -85,9 +87,12 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
         userId: _selectedUser != null ? int.parse(_selectedUser!.id) : null,
         statusTelat: _selectedStatusTelat,
       );
-      setState(() {
-        _isLoadingMore = false;
-      });
+      if (mounted) {
+        // Tambah mounted
+        setState(() {
+          _isLoadingMore = false;
+        });
+      }
     }
   }
 
@@ -115,7 +120,7 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
       });
       showLoadingDialog(context, 'Memproses data...');
       await _fetchRekap(isRefresh: true);
-      Navigator.pop(context);
+      if (mounted) Navigator.pop(context); // Tambah mounted
     }
   }
 
@@ -125,7 +130,9 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
       _endDate = null;
     });
     showLoadingDialog(context, 'Memproses data...');
-    _fetchRekap(isRefresh: true).then((_) => Navigator.pop(context));
+    _fetchRekap(isRefresh: true).then((_) {
+      if (mounted) Navigator.pop(context); // Tambah mounted
+    });
   }
 
   void _showFilterDialog() {
@@ -271,7 +278,6 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
             onPressed: _selectDateRange,
             tooltip: 'Filter Tanggal',
           ),
-
           IconButton(
             icon: Icon(Icons.filter_list),
             onPressed: _showFilterDialog,

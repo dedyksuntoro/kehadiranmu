@@ -26,7 +26,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     final url = Uri.parse(
-      'http://10.0.2.2/api_kehadiranmu/auth/register',
+      'https://mbl.nipstudio.id/api_kehadiranmu/auth/register',
     ); // Ganti ke localhost untuk emulator
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({

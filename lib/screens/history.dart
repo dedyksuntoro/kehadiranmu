@@ -298,7 +298,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         trailing:
                             absensi.fotoPath.isNotEmpty
                                 ? Image.network(
-                                  'http://10.0.2.2/api_kehadiranmu${absensi.fotoPath}',
+                                  'https://mbl.nipstudio.id/api_kehadiranmu${absensi.fotoPath}',
                                   width: 50,
                                   height: 50,
                                   fit: BoxFit.cover,

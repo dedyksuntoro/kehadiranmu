@@ -61,7 +61,9 @@ class AuthProvider with ChangeNotifier {
   Future<bool> fetchLokasi() async {
     if (_user?.token == null) return false;
 
-    final url = Uri.parse('http://10.0.2.2/api_kehadiranmu/admin/lokasi');
+    final url = Uri.parse(
+      'https://mbl.nipstudio.id/api_kehadiranmu/admin/lokasi',
+    );
     try {
       final response = await http.get(
         url,
@@ -100,7 +102,9 @@ class AuthProvider with ChangeNotifier {
   ) async {
     if (_user?.token == null) return false;
 
-    final url = Uri.parse('http://10.0.2.2/api_kehadiranmu/admin/lokasi');
+    final url = Uri.parse(
+      'https://mbl.nipstudio.id/api_kehadiranmu/admin/lokasi',
+    );
     try {
       final response = await http.post(
         url,
@@ -146,7 +150,9 @@ class AuthProvider with ChangeNotifier {
   ) async {
     if (_user?.token == null) return false;
 
-    final url = Uri.parse('http://10.0.2.2/api_kehadiranmu/admin/lokasi/$id');
+    final url = Uri.parse(
+      'https://mbl.nipstudio.id/api_kehadiranmu/admin/lokasi/$id',
+    );
     try {
       final response = await http.put(
         url,
@@ -192,7 +198,9 @@ class AuthProvider with ChangeNotifier {
   Future<bool> deleteLokasi(int id) async {
     if (_user?.token == null) return false;
 
-    final url = Uri.parse('http://10.0.2.2/api_kehadiranmu/admin/lokasi/$id');
+    final url = Uri.parse(
+      'https://mbl.nipstudio.id/api_kehadiranmu/admin/lokasi/$id',
+    );
     try {
       final response = await http.delete(
         url,
@@ -226,7 +234,9 @@ class AuthProvider with ChangeNotifier {
   Future<bool> fetchShifts() async {
     if (_user?.token == null) return false;
 
-    final url = Uri.parse('http://10.0.2.2/api_kehadiranmu/admin/shift');
+    final url = Uri.parse(
+      'https://mbl.nipstudio.id/api_kehadiranmu/admin/shift',
+    );
     try {
       final response = await http.get(
         url,
@@ -265,7 +275,9 @@ class AuthProvider with ChangeNotifier {
   ) async {
     if (_user?.token == null) return false;
 
-    final url = Uri.parse('http://10.0.2.2/api_kehadiranmu/admin/shift');
+    final url = Uri.parse(
+      'https://mbl.nipstudio.id/api_kehadiranmu/admin/shift',
+    );
     try {
       final response = await http.post(
         url,
@@ -307,7 +319,9 @@ class AuthProvider with ChangeNotifier {
   ) async {
     if (_user?.token == null) return false;
 
-    final url = Uri.parse('http://10.0.2.2/api_kehadiranmu/admin/shift/$id');
+    final url = Uri.parse(
+      'https://mbl.nipstudio.id/api_kehadiranmu/admin/shift/$id',
+    );
     try {
       final response = await http.put(
         url,
@@ -344,7 +358,9 @@ class AuthProvider with ChangeNotifier {
   Future<bool> deleteShift(int id) async {
     if (_user?.token == null) return false;
 
-    final url = Uri.parse('http://10.0.2.2/api_kehadiranmu/admin/shift/$id');
+    final url = Uri.parse(
+      'https://mbl.nipstudio.id/api_kehadiranmu/admin/shift/$id',
+    );
     try {
       final response = await http.delete(
         url,
@@ -377,7 +393,9 @@ class AuthProvider with ChangeNotifier {
     if (!_isInitialized) await _initStorage();
     if (_user?.refreshToken == null) return false;
 
-    final url = Uri.parse('http://10.0.2.2/api_kehadiranmu/auth/refresh');
+    final url = Uri.parse(
+      'https://mbl.nipstudio.id/api_kehadiranmu/auth/refresh',
+    );
     try {
       final response = await http.post(
         url,
@@ -478,7 +496,7 @@ class AuthProvider with ChangeNotifier {
       if (endDate != null) 'end_date': endDate,
     };
     final url = Uri.parse(
-      'http://10.0.2.2/api_kehadiranmu/absensi',
+      'https://mbl.nipstudio.id/api_kehadiranmu/absensi',
     ).replace(queryParameters: queryParams);
 
     try {
@@ -538,7 +556,7 @@ class AuthProvider with ChangeNotifier {
     String? statusTelat,
   }) async {
     final url = Uri.parse(
-      'http://10.0.2.2/api_kehadiranmu/admin/absensi',
+      'https://mbl.nipstudio.id/api_kehadiranmu/admin/absensi',
     ).replace(
       queryParameters: {
         'page': page.toString(),
@@ -598,7 +616,7 @@ class AuthProvider with ChangeNotifier {
       if (role != null) 'role': role,
     };
     final url = Uri.parse(
-      'http://10.0.2.2/api_kehadiranmu/admin/users',
+      'https://mbl.nipstudio.id/api_kehadiranmu/admin/users',
     ).replace(queryParameters: queryParams);
     try {
       final response = await http.get(
@@ -642,7 +660,9 @@ class AuthProvider with ChangeNotifier {
   }) async {
     if (_user?.token == null) return false;
 
-    final url = Uri.parse('http://10.0.2.2/api_kehadiranmu/admin/users');
+    final url = Uri.parse(
+      'https://mbl.nipstudio.id/api_kehadiranmu/admin/users',
+    );
     try {
       final response = await http.post(
         url,
@@ -694,7 +714,9 @@ class AuthProvider with ChangeNotifier {
   }) async {
     if (_user?.token == null) return false;
 
-    final url = Uri.parse('http://10.0.2.2/api_kehadiranmu/admin/users/$id');
+    final url = Uri.parse(
+      'https://mbl.nipstudio.id/api_kehadiranmu/admin/users/$id',
+    );
     try {
       final response = await http.put(
         url,
@@ -740,7 +762,9 @@ class AuthProvider with ChangeNotifier {
   Future<bool> deleteUser(String id) async {
     if (_user?.token == null) return false;
 
-    final url = Uri.parse('http://10.0.2.2/api_kehadiranmu/admin/users/$id');
+    final url = Uri.parse(
+      'https://mbl.nipstudio.id/api_kehadiranmu/admin/users/$id',
+    );
     try {
       final response = await http.delete(
         url,
