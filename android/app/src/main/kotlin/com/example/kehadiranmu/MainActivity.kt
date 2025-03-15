@@ -1,4 +1,4 @@
-package com.example.kehadiranmu
+package com.atmojo.kehadiranmu
 
 import io.flutter.embedding.android.FlutterActivity
 

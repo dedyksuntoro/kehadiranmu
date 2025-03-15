@@ -85,13 +85,23 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login - Kehadiranmu')),
+      // appBar: AppBar(title: Text('Login - Kehadiranmu')),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Tambahkan logo di sini
+            Center(
+              child: Image.asset(
+                'assets/logo/kehadiranmu-logo.png',
+                width: 150, // Sesuaikan ukuran logo
+                height: 150,
+                fit: BoxFit.contain, // Pastikan logo tidak terdistorsi
+              ),
+            ),
+            SizedBox(height: 20), // Jarak antara logo dan form
             TextField(
               controller: _emailController,
               decoration: InputDecoration(labelText: 'Email'),

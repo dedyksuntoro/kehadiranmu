@@ -1,0 +1,6 @@
+flutter_launcher_icons:
+  android: "launcher_icon" # Nama ikon di Android
+  ios: true # Aktifkan untuk iOS
+  image_path: "assets/logo/kehadiranmu-logo.png" # Lokasi logo
+  min_sdk_android: 21 # Opsional, minimal SDK Android
+  remove_alpha_ios: true
