@@ -20,7 +20,7 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
   DateTime? _startDate;
   DateTime? _endDate;
   String? _selectedShift;
-  UserAll? _selectedUser; // Ganti _userId jadi UserAll
+  UserAll? _selectedUser;
   String? _selectedStatusTelat;
 
   @override
@@ -117,6 +117,15 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
       await _fetchRekap(isRefresh: true);
       Navigator.pop(context);
     }
+  }
+
+  void _clearDateRange() {
+    setState(() {
+      _startDate = null;
+      _endDate = null;
+    });
+    showLoadingDialog(context, 'Memproses data...');
+    _fetchRekap(isRefresh: true).then((_) => Navigator.pop(context));
   }
 
   void _showFilterDialog() {
@@ -246,12 +255,27 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Rekap Absensi (Admin)'),
+        title: Text('Rekap Absensi'),
         actions: [
-          IconButton(icon: Icon(Icons.date_range), onPressed: _selectDateRange),
+          if (_startDate != null || _endDate != null)
+            IconButton(
+              icon: Icon(Icons.clear),
+              onPressed:
+                  (_startDate != null || _endDate != null)
+                      ? _clearDateRange
+                      : null, // Disable jika tidak ada filter
+              tooltip: 'Hapus Filter Tanggal',
+            ),
+          IconButton(
+            icon: Icon(Icons.date_range),
+            onPressed: _selectDateRange,
+            tooltip: 'Filter Tanggal',
+          ),
+
           IconButton(
             icon: Icon(Icons.filter_list),
             onPressed: _showFilterDialog,
+            tooltip: 'Filter Lainnya',
           ),
         ],
       ),

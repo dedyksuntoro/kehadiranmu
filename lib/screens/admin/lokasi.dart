@@ -388,7 +388,7 @@ class _LokasiScreenState extends State<LokasiScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Daftar Lokasi (Admin)'),
+        title: Text('Daftar Lokasi'),
         actions: [
           IconButton(
             icon: Icon(Icons.add),

@@ -128,7 +128,9 @@ class _ShiftScreenState extends State<ShiftScreen> {
                 );
                 showLoadingDialog(
                   context,
-                  shift == null ? 'Menambahkan shift...' : 'Memperbarui shift...',
+                  shift == null
+                      ? 'Menambahkan shift...'
+                      : 'Memperbarui shift...',
                 );
                 bool success;
                 if (shift == null) {
@@ -234,7 +236,7 @@ class _ShiftScreenState extends State<ShiftScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Daftar Shift (Admin)'),
+        title: Text('Daftar Shift'),
         actions: [
           IconButton(
             icon: Icon(Icons.add),
