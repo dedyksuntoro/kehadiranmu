@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:latlong2/latlong.dart' as latlong;
 import '../../models/user_all.dart';
 import '../../services/auth_provider.dart';
 import '../../widgets/loading_dialog.dart';
@@ -28,7 +30,7 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
     super.initState();
     Future.delayed(Duration.zero, () {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      authProvider.fetchUsers(); // Ambil daftar karyawan saat init
+      authProvider.fetchUsers();
       _fetchRekap();
     });
     _scrollController.addListener(() {
@@ -55,10 +57,8 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
       userId: _selectedUser != null ? int.parse(_selectedUser!.id) : null,
       statusTelat: _selectedStatusTelat,
     );
-    if (!isRefresh && mounted)
-      Navigator.pop(context); // Tambah pengecekan mounted
+    if (!isRefresh && mounted) Navigator.pop(context);
     if (!success && mounted) {
-      // Tambah mounted di sini juga
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Gagal memuat rekap absensi')));
@@ -88,12 +88,117 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
         statusTelat: _selectedStatusTelat,
       );
       if (mounted) {
-        // Tambah mounted
         setState(() {
           _isLoadingMore = false;
         });
       }
     }
+  }
+
+  void _showMapDialog(
+    BuildContext context,
+    double latitude,
+    double longitude,
+    String title,
+  ) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: SizedBox(
+            height: 400,
+            width: 300,
+            child: Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    title,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Expanded(
+                  child: FlutterMap(
+                    options: MapOptions(
+                      initialCenter: latlong.LatLng(latitude, longitude),
+                      initialZoom: 15.0,
+                      interactionOptions: const InteractionOptions(
+                        flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+                      ),
+                    ),
+                    children: [
+                      TileLayer(
+                        urlTemplate:
+                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      ),
+                      MarkerLayer(
+                        markers: [
+                          Marker(
+                            point: latlong.LatLng(latitude, longitude),
+                            width: 80.0,
+                            height: 80.0,
+                            child: Icon(
+                              Icons.location_pin,
+                              color: Colors.red,
+                              size: 40,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Tutup'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Fungsi baru untuk menampilkan gambar yang diperbesar
+  void _showImageDialog(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: SizedBox(
+            width:
+                MediaQuery.of(context).size.width * 0.9, // 90% dari lebar layar
+            height:
+                MediaQuery.of(context).size.height *
+                0.6, // 60% dari tinggi layar
+            child: Column(
+              children: [
+                Expanded(
+                  child: InteractiveViewer(
+                    panEnabled: true,
+                    scaleEnabled: true,
+                    minScale: 0.5,
+                    maxScale: 4.0,
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.contain,
+                      errorBuilder:
+                          (context, error, stackTrace) =>
+                              Icon(Icons.broken_image, size: 50),
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Tutup'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _selectDateRange() async {
@@ -120,7 +225,7 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
       });
       showLoadingDialog(context, 'Memproses data...');
       await _fetchRekap(isRefresh: true);
-      if (mounted) Navigator.pop(context); // Tambah mounted
+      if (mounted) Navigator.pop(context);
     }
   }
 
@@ -131,7 +236,7 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
     });
     showLoadingDialog(context, 'Memproses data...');
     _fetchRekap(isRefresh: true).then((_) {
-      if (mounted) Navigator.pop(context); // Tambah mounted
+      if (mounted) Navigator.pop(context);
     });
   }
 
@@ -163,11 +268,8 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
                                 ),
                               )
                               .toList(),
-                      onChanged: (value) {
-                        setStateDialog(() {
-                          tempShift = value;
-                        });
-                      },
+                      onChanged:
+                          (value) => setStateDialog(() => tempShift = value),
                     ),
                     SizedBox(height: 10),
                     Consumer<AuthProvider>(
@@ -187,11 +289,8 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
                               labelText: 'Karyawan',
                             ),
                           ),
-                          onChanged: (value) {
-                            setStateDialog(() {
-                              tempUser = value;
-                            });
-                          },
+                          onChanged:
+                              (value) => setStateDialog(() => tempUser = value),
                           selectedItem: tempUser,
                           itemAsString: (user) => user.nama,
                         );
@@ -210,11 +309,9 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
                                 ),
                               )
                               .toList(),
-                      onChanged: (value) {
-                        setStateDialog(() {
-                          tempStatusTelat = value;
-                        });
-                      },
+                      onChanged:
+                          (value) =>
+                              setStateDialog(() => tempStatusTelat = value),
                     ),
                   ],
                 ),
@@ -228,7 +325,7 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
                       _selectedStatusTelat = null;
                     });
                     Navigator.pop(context);
-                    _fetchRekap(isRefresh: false);
+                    _fetchRekap(isRefresh: true);
                   },
                   child: Text('Reset'),
                 ),
@@ -244,7 +341,7 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
                       _selectedStatusTelat = tempStatusTelat;
                     });
                     Navigator.pop(context);
-                    _fetchRekap(isRefresh: false);
+                    _fetchRekap(isRefresh: true);
                   },
                   child: Text('Terapkan'),
                 ),
@@ -267,10 +364,7 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
           if (_startDate != null || _endDate != null)
             IconButton(
               icon: Icon(Icons.clear),
-              onPressed:
-                  (_startDate != null || _endDate != null)
-                      ? _clearDateRange
-                      : null, // Disable jika tidak ada filter
+              onPressed: _clearDateRange,
               tooltip: 'Hapus Filter Tanggal',
             ),
           IconButton(
@@ -286,7 +380,7 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () => _fetchRekap(isRefresh: false),
+        onRefresh: () => _fetchRekap(isRefresh: true),
         child:
             authProvider.absensiList.isEmpty
                 ? SingleChildScrollView(
@@ -313,33 +407,107 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
                     final absensi = authProvider.absensiList[index];
                     final dateFormat = DateFormat('dd MMM yyyy');
                     final timeFormat = DateFormat('HH:mm');
+                    final imageUrl =
+                        'https://mbl.nipstudio.id/api_kehadiranmu${absensi.fotoPath}';
 
                     return Card(
                       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                       child: ListTile(
-                        title: Text(absensi.namaKaryawan),
+                        title: Text(
+                          absensi.namaKaryawan,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Tanggal: ${dateFormat.format(DateTime.parse(absensi.tanggal))}',
+                              overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              'Shift: ${absensi.shift} (${dateFormat.format(DateTime.parse(absensi.tanggalShift))})',
+                              'Shift: ${absensi.shift.capitalize()}',
+                              overflow: TextOverflow.ellipsis,
                             ),
                             Text(
                               'Masuk: ${absensi.waktuMasuk != null ? timeFormat.format(absensi.waktuMasuk!) : "Belum absen"}',
+                              overflow: TextOverflow.ellipsis,
                             ),
                             Text(
                               'Keluar: ${absensi.waktuKeluar != null ? timeFormat.format(absensi.waktuKeluar!) : "Belum absen"}',
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            Text('Lokasi Masuk: ${absensi.lokasiMasuk}'),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap:
+                                        () => _showMapDialog(
+                                          context,
+                                          absensi.latitude,
+                                          absensi.longitude,
+                                          'Lokasi Masuk',
+                                        ),
+                                    child: Text(
+                                      'Lokasi Masuk: ${absensi.lokasiMasuk}',
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child:
+                                      absensi.latitudeKeluar != null &&
+                                              absensi.longitudeKeluar != null
+                                          ? GestureDetector(
+                                            onTap:
+                                                () => _showMapDialog(
+                                                  context,
+                                                  absensi.latitudeKeluar!,
+                                                  absensi.longitudeKeluar!,
+                                                  'Lokasi Keluar',
+                                                ),
+                                            child: Text(
+                                              'Lokasi Keluar: ${absensi.lokasiKeluar}',
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          )
+                                          : Text(
+                                            'Lokasi Keluar: ${absensi.lokasiKeluar}',
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                ),
+                              ],
+                            ),
                             Text(
-                              'Lokasi Keluar: ${absensi.lokasiKeluar ?? "Belum absen"}',
+                              'Status: ${absensi.statusTelat.capitalize()}',
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            Text('Status: ${absensi.statusTelat}'),
                           ],
                         ),
+                        trailing:
+                            absensi.fotoPath.isNotEmpty
+                                ? GestureDetector(
+                                  onTap:
+                                      () => _showImageDialog(context, imageUrl),
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      maxWidth: 50,
+                                      maxHeight: 50,
+                                    ),
+                                    child: Image.network(
+                                      imageUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              Icon(Icons.broken_image),
+                                    ),
+                                  ),
+                                )
+                                : Icon(Icons.photo),
                       ),
                     );
                   },

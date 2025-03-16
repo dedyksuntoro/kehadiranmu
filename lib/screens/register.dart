@@ -91,12 +91,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: namaController,
                   decoration: InputDecoration(labelText: 'Nama'),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Nama wajib diisi';
-                    }
-                    return null;
-                  },
+                  validator:
+                      (value) =>
+                          value == null || value.trim().isEmpty
+                              ? 'Nama wajib diisi'
+                              : null,
                 ),
                 SizedBox(height: 10),
                 TextFormField(
@@ -104,12 +103,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   decoration: InputDecoration(labelText: 'Email'),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
+                    if (value == null || value.trim().isEmpty)
                       return 'Email wajib diisi';
-                    }
-                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value))
                       return 'Masukkan email yang valid';
-                    }
                     return null;
                   },
                 ),
@@ -119,12 +116,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   decoration: InputDecoration(labelText: 'Password'),
                   obscureText: true,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
+                    if (value == null || value.trim().isEmpty)
                       return 'Password wajib diisi';
-                    }
-                    if (value.length < 6) {
-                      return 'Password minimal 6 karakter';
-                    }
+                    if (value.length < 6) return 'Password minimal 6 karakter';
                     return null;
                   },
                 ),
@@ -136,10 +130,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   keyboardType: TextInputType.phone,
                   validator: (value) {
-                    if (value != null && value.trim().isNotEmpty) {
-                      if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-                        return 'Masukkan nomor telepon yang valid';
-                      }
+                    if (value != null &&
+                        value.trim().isNotEmpty &&
+                        !RegExp(r'^[0-9]+$').hasMatch(value)) {
+                      return 'Masukkan nomor telepon yang valid';
                     }
                     return null;
                   },
@@ -153,9 +147,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                 SizedBox(height: 10),
                 TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
+                  onPressed: () => Navigator.pop(context),
                   child: Text('Sudah punya akun? Login di sini'),
                 ),
               ],

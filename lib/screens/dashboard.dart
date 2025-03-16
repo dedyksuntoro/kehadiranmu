@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -228,7 +227,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       return;
     }
 
-    showLoadingDialog(context, 'Memproses data...');
+    showLoadingDialog(context, 'Proses absen masuk...');
     final position = await _getCurrentLocation(context);
     if (position == null) {
       Navigator.pop(context);
@@ -305,7 +304,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       return;
     }
 
-    showLoadingDialog(context, 'Memproses data...');
+    showLoadingDialog(context, 'Proses absen keluar...');
     final position = await _getCurrentLocation(context);
     if (position == null) {
       Navigator.pop(context);
@@ -421,146 +420,136 @@ class _DashboardScreenState extends State<DashboardScreen>
   Widget _buildUserDashboard(BuildContext context, int index) {
     final authProvider = Provider.of<AuthProvider>(context);
     final user = authProvider.user!;
-    final double screenWidth =
-        MediaQuery.of(context).size.width; // Ambil lebar layar
-    final double dynamicPadding = screenWidth; // 5% dari lebar layar
-    final double maxPadding = 32.0; // Batas maksimum padding
-    final double minPadding = 16.0; // Batas minimum padding
-    final double responsivePadding = dynamicPadding.clamp(
-      minPadding,
-      maxPadding,
-    ); // Batasi rentang
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double responsivePadding = (screenWidth * 0.05).clamp(16.0, 32.0);
 
     final List<Widget> userPages = [
       // Tab 0: Absen
-      Container(
-        // decoration: BoxDecoration(
-        //   gradient: LinearGradient(
-        //     colors: [Colors.grey.shade300, Colors.white],
-        //     begin: Alignment.topLeft,
-        //     end: Alignment.bottomRight,
-        //   ),
-        // ),
-        child: Padding(
-          padding: EdgeInsets.all(responsivePadding), // Gunakan padding dinamis
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                user.nama,
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center, // Teks tetap center di dalam batas
-                overflow:
-                    TextOverflow
-                        .ellipsis, // Tambah ellipsis jika terlalu panjang
-              ),
-              SizedBox(
-                height: responsivePadding * 0.025,
-              ), // Sesuaikan jarak dengan padding (10/16)
-              StreamBuilder(
-                stream: Stream.periodic(Duration(seconds: 1)),
-                builder: (context, snapshot) {
-                  return Text(
-                    'Waktu saat ini: ${DateFormat('HH:mm:ss').format(DateTime.now())}',
-                    style: TextStyle(fontSize: 16),
-                  );
-                },
-              ),
-              SizedBox(height: responsivePadding * 1.5), // 40/16 = 2.5x padding
-              GestureDetector(
-                onTapDown: (_) => _masukController.forward(),
-                onTapUp:
-                    (_) => _masukController.reverse().then(
-                      (_) => _absenMasuk(context),
-                    ),
-                onTapCancel: () => _masukController.reverse(),
-                child: ScaleTransition(
-                  scale: Tween<double>(
-                    begin: 1.0,
-                    end: 0.95,
-                  ).animate(_masukController),
-                  child: Card(
-                    elevation: 8,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: responsivePadding * 1.25,
-                        horizontal: responsivePadding * 2.5,
-                      ), // 20/16 = 1.25, 40/16 = 2.5
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.login, color: Colors.blue),
-                          SizedBox(width: responsivePadding * 0.625), // 10/16
-                          Text(
-                            'Absen Masuk',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+      Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(responsivePadding),
+            child: Column(
+              mainAxisSize:
+                  MainAxisSize.min, // Membatasi tinggi Column ke konten
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  user.nama,
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+                SizedBox(height: responsivePadding * 0.5),
+                StreamBuilder(
+                  stream: Stream.periodic(Duration(seconds: 1)),
+                  builder: (context, snapshot) {
+                    return Text(
+                      'Waktu saat ini: ${DateFormat('HH:mm:ss').format(DateTime.now())}',
+                      style: TextStyle(fontSize: 16),
+                      overflow: TextOverflow.ellipsis,
+                    );
+                  },
+                ),
+                SizedBox(height: responsivePadding * 1.5),
+                GestureDetector(
+                  onTapDown: (_) => _masukController.forward(),
+                  onTapUp:
+                      (_) => _masukController.reverse().then(
+                        (_) => _absenMasuk(context),
+                      ),
+                  onTapCancel: () => _masukController.reverse(),
+                  child: ScaleTransition(
+                    scale: Tween<double>(
+                      begin: 1.0,
+                      end: 0.95,
+                    ).animate(_masukController),
+                    child: Card(
+                      elevation: 8,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: responsivePadding * 1.25,
+                          horizontal: responsivePadding * 2,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.login, color: Colors.blue),
+                            SizedBox(width: responsivePadding * 0.5),
+                            Text(
+                              'Absen Masuk',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(height: responsivePadding * 1.25), // 20/16
-              GestureDetector(
-                onTapDown: (_) => _keluarController.forward(),
-                onTapUp:
-                    (_) => _keluarController.reverse().then(
-                      (_) => _absenKeluar(context),
-                    ),
-                onTapCancel: () => _keluarController.reverse(),
-                child: ScaleTransition(
-                  scale: Tween<double>(
-                    begin: 1.0,
-                    end: 0.95,
-                  ).animate(_keluarController),
-                  child: Card(
-                    elevation: 8,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: responsivePadding * 1.25,
-                        horizontal: responsivePadding * 2.5,
+                SizedBox(height: responsivePadding),
+                GestureDetector(
+                  onTapDown: (_) => _keluarController.forward(),
+                  onTapUp:
+                      (_) => _keluarController.reverse().then(
+                        (_) => _absenKeluar(context),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.logout, color: Colors.red),
-                          SizedBox(width: responsivePadding * 0.625),
-                          Text(
-                            'Absen Keluar',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                  onTapCancel: () => _keluarController.reverse(),
+                  child: ScaleTransition(
+                    scale: Tween<double>(
+                      begin: 1.0,
+                      end: 0.95,
+                    ).animate(_keluarController),
+                    child: Card(
+                      elevation: 8,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: responsivePadding * 1.25,
+                          horizontal: responsivePadding * 2,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.logout, color: Colors.red),
+                            SizedBox(width: responsivePadding * 0.5),
+                            Text(
+                              'Absen Keluar',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(height: responsivePadding * 2.5), // 40/16
-              Text(
-                'Silakan absen untuk memulai atau mengakhiri hari ini!',
-                style: TextStyle(fontSize: 15),
-                textAlign: TextAlign.center,
-              ),
-            ],
+                SizedBox(height: responsivePadding * 2),
+                Text(
+                  'Silakan absen untuk memulai atau mengakhiri hari ini!',
+                  style: TextStyle(fontSize: 15),
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                ),
+              ],
+            ),
           ),
         ),
       ),
       // Tab 1: Riwayat Absensi
       HistoryScreen(),
-      // Tab 2: Logout (Placeholder)
+      // Tab 2: Logout
       Center(child: Text('Logout akan ditangani di BottomNavBar')),
     ];
 

@@ -145,6 +145,47 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
+  // Fungsi baru untuk menampilkan gambar yang diperbesar
+  void _showImageDialog(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: SizedBox(
+            width:
+                MediaQuery.of(context).size.width * 0.9, // 90% dari lebar layar
+            height:
+                MediaQuery.of(context).size.height *
+                0.6, // 60% dari tinggi layar
+            child: Column(
+              children: [
+                Expanded(
+                  child: InteractiveViewer(
+                    panEnabled: true, // Mengizinkan geser
+                    scaleEnabled: true, // Mengizinkan zoom
+                    minScale: 0.5,
+                    maxScale: 4.0,
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.contain,
+                      errorBuilder:
+                          (context, error, stackTrace) =>
+                              Icon(Icons.broken_image, size: 50),
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Tutup'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _selectDateRange() async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
@@ -169,7 +210,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       });
       showLoadingDialog(context, 'Memproses data...');
       await _fetchAbsensi(isRefresh: true);
-      Navigator.pop(context); // Tutup loading setelah selesai
+      Navigator.pop(context);
     }
   }
 
@@ -193,10 +234,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           if (_startDate != null || _endDate != null)
             IconButton(
               icon: Icon(Icons.clear),
-              onPressed:
-                  (_startDate != null || _endDate != null)
-                      ? _clearDateRange
-                      : null, // Disable jika tidak ada filter
+              onPressed: _clearDateRange,
               tooltip: 'Hapus Filter',
             ),
           IconButton(
@@ -234,77 +272,100 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     final absensi = authProvider.absensiList[index];
                     final dateFormat = DateFormat('dd MMM yyyy');
                     final timeFormat = DateFormat('HH:mm');
+                    final imageUrl =
+                        'https://mbl.nipstudio.id/api_kehadiranmu${absensi.fotoPath}';
 
                     return Card(
                       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                       child: ListTile(
                         title: Text(
                           dateFormat.format(DateTime.parse(absensi.tanggal)),
+                          overflow: TextOverflow.ellipsis,
                         ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Shift: ${absensi.shift.capitalize()}'),
+                            Text(
+                              'Shift: ${absensi.shift.capitalize()}',
+                              overflow: TextOverflow.ellipsis,
+                            ),
                             Text(
                               'Masuk: ${absensi.waktuMasuk != null ? timeFormat.format(absensi.waktuMasuk!) : "Belum absen"}',
+                              overflow: TextOverflow.ellipsis,
                             ),
                             Text(
                               'Keluar: ${absensi.waktuKeluar != null ? timeFormat.format(absensi.waktuKeluar!) : "Belum absen"}',
+                              overflow: TextOverflow.ellipsis,
                             ),
                             Row(
                               children: [
-                                GestureDetector(
-                                  child: Text(
-                                    'Lokasi Masuk: ${absensi.lokasiMasuk} ',
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap:
+                                        () => _showMapDialog(
+                                          context,
+                                          absensi.latitude,
+                                          absensi.longitude,
+                                          'Lokasi Masuk',
+                                        ),
+                                    child: Text(
+                                      'Lokasi Masuk: ${absensi.lokasiMasuk}',
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
-                                  onTap:
-                                      () => _showMapDialog(
-                                        context,
-                                        absensi.latitude,
-                                        absensi.longitude,
-                                        'Lokasi Masuk',
-                                      ),
                                 ),
                               ],
                             ),
                             Row(
                               children: [
-                                if (absensi.latitudeKeluar == null &&
-                                    absensi.longitudeKeluar == null)
-                                  Text(
-                                    'Lokasi Keluar: ${absensi.lokasiKeluar} ',
-                                  ),
-                                if (absensi.latitudeKeluar != null &&
-                                    absensi.longitudeKeluar != null)
-                                  GestureDetector(
-                                    child: Text(
-                                      'Lokasi Keluar: ${absensi.lokasiKeluar} ',
-                                    ),
-                                    onTap:
-                                        () => _showMapDialog(
-                                          context,
-                                          absensi.latitudeKeluar!,
-                                          absensi.longitudeKeluar!,
-                                          'Lokasi Keluar',
-                                        ),
-                                  ),
+                                Expanded(
+                                  child:
+                                      absensi.latitudeKeluar != null &&
+                                              absensi.longitudeKeluar != null
+                                          ? GestureDetector(
+                                            onTap:
+                                                () => _showMapDialog(
+                                                  context,
+                                                  absensi.latitudeKeluar!,
+                                                  absensi.longitudeKeluar!,
+                                                  'Lokasi Keluar',
+                                                ),
+                                            child: Text(
+                                              'Lokasi Keluar: ${absensi.lokasiKeluar}',
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          )
+                                          : Text(
+                                            'Lokasi Keluar: ${absensi.lokasiKeluar}',
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                ),
                               ],
                             ),
                             Text(
                               'Status: ${absensi.statusTelat.capitalize() ?? "Tidak diketahui"}',
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
                         trailing:
                             absensi.fotoPath.isNotEmpty
-                                ? Image.network(
-                                  'https://mbl.nipstudio.id/api_kehadiranmu${absensi.fotoPath}',
-                                  width: 50,
-                                  height: 50,
-                                  fit: BoxFit.cover,
-                                  errorBuilder:
-                                      (context, error, stackTrace) =>
-                                          Icon(Icons.broken_image),
+                                ? GestureDetector(
+                                  onTap:
+                                      () => _showImageDialog(context, imageUrl),
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      maxWidth: 50,
+                                      maxHeight: 50,
+                                    ),
+                                    child: Image.network(
+                                      imageUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              Icon(Icons.broken_image),
+                                    ),
+                                  ),
                                 )
                                 : Icon(Icons.photo),
                       ),

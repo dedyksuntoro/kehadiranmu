@@ -45,12 +45,11 @@ class _LoginScreenState extends State<LoginScreen> {
         final accessToken = data['access_token'];
         final refreshToken = data['refresh_token'];
 
-        // Dekode access_token untuk mendapatkan data user
         Map<String, dynamic> decodedToken = JwtDecoder.decode(accessToken);
         final userData = decodedToken['data'];
 
         final user = User(
-          id: userData['id'].toString(), // Pastikan jadi String
+          id: userData['id'].toString(),
           nama: userData['nama'],
           email: userData['email'],
           role: userData['role'],
@@ -86,51 +85,65 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      // appBar: AppBar(title: Text('Login - Kehadiranmu')),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Tambahkan logo di sini
-            Center(
-              child: Image.asset(
-                'assets/logo/kehadiranmu-logo.png',
-                width: 150, // Sesuaikan ukuran logo
-                height: 150,
-                fit: BoxFit.contain, // Pastikan logo tidak terdistorsi
-              ),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize:
+                  MainAxisSize.min, // Membatasi Column hanya sebesar kontennya
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Image.asset(
+                    'assets/logo/kehadiranmu-logo.png',
+                    width: screenWidth * 0.4,
+                    height: screenWidth * 0.4,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                SizedBox(height: 20),
+                TextField(
+                  controller: _emailController,
+                  decoration: InputDecoration(labelText: 'Email'),
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                TextField(
+                  controller: _passwordController,
+                  decoration: InputDecoration(labelText: 'Password'),
+                  obscureText: true,
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(onPressed: _login, child: Text('Login')),
+                if (_errorMessage.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.only(top: 10),
+                    child: Text(
+                      _errorMessage,
+                      style: TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                // TextButton(
+                //   onPressed:
+                //       () => Navigator.push(
+                //         context,
+                //         MaterialPageRoute(
+                //           builder: (context) => RegisterScreen(),
+                //         ),
+                //       ),
+                //   child: Text(
+                //     'Belum punya akun? Daftar di sini',
+                //     textAlign: TextAlign.center,
+                //   ),
+                // ),
+              ],
             ),
-            SizedBox(height: 20), // Jarak antara logo dan form
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(onPressed: _login, child: Text('Login')),
-            if (_errorMessage.isNotEmpty)
-              Padding(
-                padding: EdgeInsets.only(top: 10),
-                child: Text(_errorMessage, style: TextStyle(color: Colors.red)),
-              ),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => RegisterScreen()),
-                );
-              },
-              child: Text('Belum punya akun? Daftar di sini'),
-            ),
-          ],
+          ),
         ),
       ),
     );
