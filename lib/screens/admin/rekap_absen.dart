@@ -28,11 +28,7 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero, () {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      authProvider.fetchUsers();
-      _fetchRekap();
-    });
+    _initializeData(); // Panggil fungsi terpisah
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
               _scrollController.position.maxScrollExtent &&
@@ -42,31 +38,53 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
     });
   }
 
+  Future<void> _initializeData() async {
+    if (!mounted) return; // Cek mounted sebelum akses context
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await authProvider.fetchUsers();
+    if (mounted) await _fetchRekap(); // Hanya lanjutkan jika masih mounted
+  }
+
   Future<void> _fetchRekap({bool isRefresh = false}) async {
+    if (!mounted) return; // Cek mounted sebelum akses context
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     if (!isRefresh) showLoadingDialog(context, 'Memproses data...');
-    final success = await authProvider.fetchAllAbsensi(
-      page: isRefresh ? 1 : _currentPage,
-      tanggalAwal:
-          _startDate != null
-              ? DateFormat('yyyy-MM-dd').format(_startDate!)
-              : null,
-      tanggalAkhir:
-          _endDate != null ? DateFormat('yyyy-MM-dd').format(_endDate!) : null,
-      shift: _selectedShift,
-      userId: _selectedUser != null ? int.parse(_selectedUser!.id) : null,
-      statusTelat: _selectedStatusTelat,
-    );
-    if (!isRefresh && mounted) Navigator.pop(context);
-    if (!success && mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Gagal memuat rekap absensi')));
+    try {
+      final success = await authProvider.fetchAllAbsensi(
+        page: isRefresh ? 1 : _currentPage,
+        tanggalAwal:
+            _startDate != null
+                ? DateFormat('yyyy-MM-dd').format(_startDate!)
+                : null,
+        tanggalAkhir:
+            _endDate != null
+                ? DateFormat('yyyy-MM-dd').format(_endDate!)
+                : null,
+        shift: _selectedShift,
+        userId: _selectedUser != null ? int.parse(_selectedUser!.id) : null,
+        statusTelat: _selectedStatusTelat,
+      );
+      if (!success && mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal memuat rekap absensi')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    } finally {
+      if (!isRefresh && mounted) {
+        Navigator.pop(context);
+      }
     }
     if (isRefresh) _currentPage = 1;
   }
 
   Future<void> _loadMore() async {
+    if (!mounted) return; // Cek mounted
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     if (_currentPage < authProvider.totalPages && !_isLoadingMore) {
       setState(() {
@@ -160,18 +178,14 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
     );
   }
 
-  // Fungsi baru untuk menampilkan gambar yang diperbesar
   void _showImageDialog(BuildContext context, String imageUrl) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return Dialog(
           child: SizedBox(
-            width:
-                MediaQuery.of(context).size.width * 0.9, // 90% dari lebar layar
-            height:
-                MediaQuery.of(context).size.height *
-                0.6, // 60% dari tinggi layar
+            width: MediaQuery.of(context).size.width * 0.9,
+            height: MediaQuery.of(context).size.height * 0.6,
             child: Column(
               children: [
                 Expanded(

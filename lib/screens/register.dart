@@ -103,10 +103,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   decoration: InputDecoration(labelText: 'Email'),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty)
+                    if (value == null || value.trim().isEmpty) {
                       return 'Email wajib diisi';
-                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value))
+                    }
+                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
                       return 'Masukkan email yang valid';
+                    }
                     return null;
                   },
                 ),
@@ -116,8 +118,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   decoration: InputDecoration(labelText: 'Password'),
                   obscureText: true,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty)
+                    if (value == null || value.trim().isEmpty) {
                       return 'Password wajib diisi';
+                    }
                     if (value.length < 6) return 'Password minimal 6 karakter';
                     return null;
                   },
