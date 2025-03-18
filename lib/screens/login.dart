@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import '../services/auth_provider.dart';
 import '../models/user.dart';
+import '../services/base_url.dart';
 import '../widgets/loading_dialog.dart';
 import 'dashboard.dart';
 
@@ -22,9 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final url = Uri.parse(
-      'https://mbl.nipstudio.id/api_kehadiranmu/auth/login',
-    );
+    final url = Uri.parse('${BaseUrl.nya}/api_kehadiranmu/auth/login');
 
     showLoadingDialog(context, 'Sedang login...');
     try {

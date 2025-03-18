@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' as latlong;
 import '../services/auth_provider.dart';
+import '../services/base_url.dart';
 import '../widgets/loading_dialog.dart';
 
 class HistoryScreen extends StatefulWidget {
@@ -271,9 +272,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     }
                     final absensi = authProvider.absensiList[index];
                     final dateFormat = DateFormat('dd MMM yyyy');
-                    final timeFormat = DateFormat('HH:mm');
+                    final timeFormat = DateFormat('HH:mm:ss');
                     final imageUrl =
-                        'https://mbl.nipstudio.id/api_kehadiranmu${absensi.fotoPath}';
+                        '${BaseUrl.nya}/api_kehadiranmu${absensi.fotoPath}';
 
                     return Card(
                       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
@@ -290,11 +291,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              'Masuk: ${absensi.waktuMasuk != null ? timeFormat.format(absensi.waktuMasuk!) : "Belum absen"}',
+                              'Masuk: ${absensi.waktuMasuk != null ? timeFormat.format(absensi.waktuMasuk!) : "Tidak diketahui"}',
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              'Keluar: ${absensi.waktuKeluar != null ? timeFormat.format(absensi.waktuKeluar!) : "Belum absen"}',
+                              'Keluar: ${absensi.waktuKeluar != null ? timeFormat.format(absensi.waktuKeluar!) : "Tidak diketahui"}',
                               overflow: TextOverflow.ellipsis,
                             ),
                             Row(
@@ -331,12 +332,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                                   'Lokasi Keluar',
                                                 ),
                                             child: Text(
-                                              'Lokasi Keluar: ${absensi.lokasiKeluar}',
+                                              'Lokasi Keluar: ${absensi.lokasiKeluar != null ? absensi.lokasiKeluar! : "Tidak diketahui"}',
                                               overflow: TextOverflow.ellipsis,
                                             ),
                                           )
                                           : Text(
-                                            'Lokasi Keluar: ${absensi.lokasiKeluar}',
+                                            'Lokasi Keluar: ${absensi.lokasiKeluar != null ? absensi.lokasiKeluar! : "Tidak diketahui"}',
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                 ),

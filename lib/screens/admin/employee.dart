@@ -16,6 +16,7 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
   final _formKey = GlobalKey<FormState>();
   final _namaFilterController = TextEditingController();
   String? _nama, _email, _password, _nomorTelepon, _role;
+  int? _shiftId; // Tambahkan _shiftId untuk menyimpan shift yang dipilih
   String? _selectedRoleFilter = 'user'; // Default filter role
   UserAll? _editingUser;
 
@@ -30,17 +31,16 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
   Future<void> _fetchInitialData() async {
     print('Fetching initial data...');
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    showLoadingDialog(
-      context,
-      'Memproses data...',
-    ); // Tampilkan dialog loading
+    showLoadingDialog(context, 'Memproses data...');
     final success = await authProvider.fetchUsers(role: _selectedRoleFilter);
+    final shiftsSuccess =
+        await authProvider.fetchShifts(); // Ambil daftar shift
     if (mounted) {
       Navigator.pop(context); // Tutup dialog loading
-      if (!success) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Gagal memuat data karyawan')));
+      if (!success || !shiftsSuccess) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memuat data karyawan atau shift')),
+        );
       }
     }
   }
@@ -142,13 +142,15 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
       _nama = user?.nama;
       _email = user?.email;
       _password = null; // Kosongkan untuk edit
-      _nomorTelepon = user?.nomorTelepon; // Bisa null
+      _nomorTelepon = user?.nomorTelepon;
       _role = user?.role;
+      _shiftId = user?.shiftId; // Inisialisasi _shiftId dari user
     });
 
     showDialog(
       context: context,
       builder: (context) {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
         return AlertDialog(
           title: Text(user == null ? 'Tambah Karyawan' : 'Edit Karyawan'),
           content: Form(
@@ -210,7 +212,23 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
                             .toList(),
                     validator:
                         (value) => value == null ? 'Role wajib dipilih' : null,
-                    onChanged: (value) => _role = value,
+                    onChanged: (value) => setState(() => _role = value),
+                  ),
+                  DropdownButtonFormField<int>(
+                    value: _shiftId,
+                    decoration: InputDecoration(labelText: 'Shift'),
+                    items:
+                        authProvider.shiftList
+                            .map(
+                              (shift) => DropdownMenuItem(
+                                value: shift.id,
+                                child: Text(shift.shift),
+                              ),
+                            )
+                            .toList(),
+                    validator:
+                        (value) => value == null ? 'Shift wajib dipilih' : null,
+                    onChanged: (value) => setState(() => _shiftId = value),
                   ),
                 ],
               ),
@@ -248,6 +266,7 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
             password: _password!,
             nomorTelepon: _nomorTelepon!,
             role: _role!,
+            shiftId: _shiftId, // Kirim shiftId
           );
         } else {
           success = await authProvider.updateUser(
@@ -257,6 +276,7 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
             password: _password,
             nomorTelepon: _nomorTelepon!,
             role: _role!,
+            shiftId: _shiftId, // Kirim shiftId
           );
         }
         if (mounted) {
@@ -394,8 +414,11 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
                             Text('Email: ${user.email}'),
                             Text(
                               'Nomor Telepon: ${user.nomorTelepon ?? 'Tidak ada'}',
-                            ), // Handle null
+                            ),
                             Text('Role: ${user.role}'),
+                            Text(
+                              'Shift: ${user.shiftName ?? 'Tidak ada'}',
+                            ), // Tampilkan nama shift
                             Text('Dibuat: ${user.createdAt}'),
                           ],
                         ),

@@ -6,6 +6,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:latlong2/latlong.dart' as latlong;
 import '../../models/user_all.dart';
 import '../../services/auth_provider.dart';
+import '../../services/base_url.dart';
 import '../../widgets/loading_dialog.dart';
 
 class RekapAbsenScreen extends StatefulWidget {
@@ -42,6 +43,7 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
     if (!mounted) return; // Cek mounted sebelum akses context
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     await authProvider.fetchUsers();
+    await authProvider.fetchShifts();
     if (mounted) await _fetchRekap(); // Hanya lanjutkan jika masih mounted
   }
 
@@ -270,22 +272,32 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    DropdownButtonFormField<String>(
-                      value: tempShift,
-                      decoration: InputDecoration(labelText: 'Shift'),
-                      items:
-                          ['pagi', 'siang', 'malam']
-                              .map(
-                                (shift) => DropdownMenuItem(
-                                  value: shift,
-                                  child: Text(shift.capitalize()),
-                                ),
-                              )
-                              .toList(),
-                      onChanged:
-                          (value) => setStateDialog(() => tempShift = value),
+                    Consumer<AuthProvider>(
+                      builder: (context, authProvider, child) {
+                        return DropdownButtonFormField<String>(
+                          value: tempShift,
+                          decoration: InputDecoration(labelText: 'Shift'),
+                          items:
+                              authProvider.shiftList
+                                  .map(
+                                    (shift) => DropdownMenuItem(
+                                      value: shift.shift,
+                                      child: Text(shift.shift.capitalize()),
+                                    ),
+                                  )
+                                  .toList(),
+                          onChanged:
+                              (value) =>
+                                  setStateDialog(() => tempShift = value),
+                          hint:
+                              authProvider.shiftList.isEmpty
+                                  ? Text('Tidak ada shift tersedia')
+                                  : null,
+                        );
+                      },
                     ),
                     SizedBox(height: 10),
+                    // Dropdown lainnya (Karyawan dan Status Telat) tetap sama
                     Consumer<AuthProvider>(
                       builder: (context, authProvider, child) {
                         return DropdownSearch<UserAll>(
@@ -339,7 +351,7 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
                       _selectedStatusTelat = null;
                     });
                     Navigator.pop(context);
-                    _fetchRekap(isRefresh: true);
+                    _fetchRekap(isRefresh: false);
                   },
                   child: Text('Reset'),
                 ),
@@ -355,7 +367,7 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
                       _selectedStatusTelat = tempStatusTelat;
                     });
                     Navigator.pop(context);
-                    _fetchRekap(isRefresh: true);
+                    _fetchRekap(isRefresh: false);
                   },
                   child: Text('Terapkan'),
                 ),
@@ -394,7 +406,7 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () => _fetchRekap(isRefresh: true),
+        onRefresh: () => _fetchRekap(isRefresh: false),
         child:
             authProvider.absensiList.isEmpty
                 ? SingleChildScrollView(
@@ -420,9 +432,9 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
                     }
                     final absensi = authProvider.absensiList[index];
                     final dateFormat = DateFormat('dd MMM yyyy');
-                    final timeFormat = DateFormat('HH:mm');
+                    final timeFormat = DateFormat('HH:mm:ss');
                     final imageUrl =
-                        'https://mbl.nipstudio.id/api_kehadiranmu${absensi.fotoPath}';
+                        '${BaseUrl.nya}/api_kehadiranmu${absensi.fotoPath}';
 
                     return Card(
                       margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
@@ -444,11 +456,11 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              'Masuk: ${absensi.waktuMasuk != null ? timeFormat.format(absensi.waktuMasuk!) : "Belum absen"}',
+                              'Masuk: ${absensi.waktuMasuk != null ? timeFormat.format(absensi.waktuMasuk!) : "Tidak diketahui"}',
                               overflow: TextOverflow.ellipsis,
                             ),
                             Text(
-                              'Keluar: ${absensi.waktuKeluar != null ? timeFormat.format(absensi.waktuKeluar!) : "Belum absen"}',
+                              'Keluar: ${absensi.waktuKeluar != null ? timeFormat.format(absensi.waktuKeluar!) : "Tidak diketahui"}',
                               overflow: TextOverflow.ellipsis,
                             ),
                             Row(
@@ -485,12 +497,12 @@ class _RekapAbsenScreenState extends State<RekapAbsenScreen> {
                                                   'Lokasi Keluar',
                                                 ),
                                             child: Text(
-                                              'Lokasi Keluar: ${absensi.lokasiKeluar}',
+                                              'Lokasi Keluar: ${absensi.lokasiKeluar != null ? absensi.lokasiKeluar! : "Tidak diketahui"}',
                                               overflow: TextOverflow.ellipsis,
                                             ),
                                           )
                                           : Text(
-                                            'Lokasi Keluar: ${absensi.lokasiKeluar}',
+                                            'Lokasi Keluar: ${absensi.lokasiKeluar != null ? absensi.lokasiKeluar! : "Tidak diketahui"}',
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                 ),

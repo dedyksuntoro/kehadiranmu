@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import '../services/base_url.dart';
 // Pastikan file ini sudah ada
 
 class RegisterScreen extends StatefulWidget {
@@ -26,7 +28,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     final url = Uri.parse(
-      'https://mbl.nipstudio.id/api_kehadiranmu/auth/register',
+      '${BaseUrl.nya}/api_kehadiranmu/auth/register',
     ); // Ganti ke localhost untuk emulator
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({

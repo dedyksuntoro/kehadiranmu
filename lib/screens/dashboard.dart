@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 import '../services/auth_provider.dart';
+import '../services/base_url.dart';
 import '../widgets/loading_dialog.dart';
 import 'admin/lokasi.dart';
 import 'admin/rekap_absen.dart';
@@ -94,10 +95,20 @@ class _DashboardScreenState extends State<DashboardScreen>
     if (!permissionGranted) return null;
 
     try {
-      return await Geolocator.getCurrentPosition(
+      Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
         timeLimit: Duration(seconds: 10),
       );
+
+      // Periksa apakah lokasi adalah mock (hanya untuk Android API 31+)
+      if (position.isMocked) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lokasi palsu terdeteksi, gunakan GPS asli.')),
+        );
+        return null;
+      }
+
+      return position;
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -129,9 +140,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     File image,
     String token,
   ) async {
-    final url = Uri.parse(
-      'https://mbl.nipstudio.id/api_kehadiranmu/absensi/upload-foto',
-    );
+    final url = Uri.parse('${BaseUrl.nya}/api_kehadiranmu/absensi/upload-foto');
     try {
       var request =
           http.MultipartRequest('POST', url)
@@ -246,7 +255,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       return;
     }
 
-    final url = Uri.parse('https://mbl.nipstudio.id/api_kehadiranmu/absensi');
+    final url = Uri.parse('${BaseUrl.nya}/api_kehadiranmu/absensi');
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
@@ -311,9 +320,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       return;
     }
 
-    final url = Uri.parse(
-      'https://mbl.nipstudio.id/api_kehadiranmu/absensi/keluar',
-    );
+    final url = Uri.parse('${BaseUrl.nya}/api_kehadiranmu/absensi/keluar');
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
@@ -441,14 +448,60 @@ class _DashboardScreenState extends State<DashboardScreen>
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),
-                SizedBox(height: responsivePadding * 0.5),
+                SizedBox(height: responsivePadding * 0.10),
                 StreamBuilder(
                   stream: Stream.periodic(Duration(seconds: 1)),
                   builder: (context, snapshot) {
-                    return Text(
-                      'Waktu saat ini: ${DateFormat('HH:mm:ss').format(DateTime.now())}',
-                      style: TextStyle(fontSize: 16),
-                      overflow: TextOverflow.ellipsis,
+                    final now = DateTime.now();
+                    const List<String> hari = [
+                      'Minggu',
+                      'Senin',
+                      'Selasa',
+                      'Rabu',
+                      'Kamis',
+                      'Jumat',
+                      'Sabtu',
+                    ];
+                    const List<String> bulan = [
+                      'Januari',
+                      'Februari',
+                      'Maret',
+                      'April',
+                      'Mei',
+                      'Juni',
+                      'Juli',
+                      'Agustus',
+                      'September',
+                      'Oktober',
+                      'November',
+                      'Desember',
+                    ];
+
+                    String namaHari =
+                        hari[now.weekday % 7]; // Hari dimulai dari 0 (Minggu)
+                    String tanggal =
+                        '${now.day} ${bulan[now.month - 1]} ${now.year}';
+                    String jam = DateFormat('HH:mm:ss').format(now);
+
+                    return Column(
+                      children: [
+                        Text(
+                          '$namaHari, $tanggal',
+                          style: TextStyle(fontSize: 16),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(
+                          height: 1,
+                        ), // Jarak kecil antara tanggal dan jam
+                        Text(
+                          jam,
+                          style: TextStyle(
+                            fontSize: 16,
+                            // fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     );
                   },
                 ),
