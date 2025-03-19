@@ -2,31 +2,37 @@
 # Kehadiranmu
 
 Aplikasi absensi karyawan yang simpel dan sederhana
+[Flutter]
 
 
-## Features Admin
+## Features Admin 🪶
 
 - Pengelolaan karyawan
 - Pengelolaan shift
 - Pengelolaan lokasi absen
 - Pengelolaan rekap absen
 
-## Features User
+## Features User 🪶
 
 - Absen masuk (Merekam GPS & Foto Pengguna)
 - Absen keluar (Merekam GPS)
 - Pengelolaan riwayat absen
 - Anti fake GPS
 
-## Installation
+## Installation 💻
 
 - Pasang API ke servermu dulu - [API Kehadiranmu](https://github.com/dedyksuntoro/api_kehadiranmu)
 - Duplikasi repositorinya / download ZIP-nya
 - Jangan lupa jalankan perintah `flutter pub get`
 - Edit `base_url.dart`, ganti `http://10.0.2.2` dengan url servermu
 - Jalankan aplikasi `flutter run`
+- Pakai admin default untuk login awal
+  ```bash
+  super@user.com
+  superusersaja
+  ```
 
-## Screenshots Admin
+## Screenshots Admin 📱
 
 ![Login](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_01.png)
 ![Rekap Absen](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_02.png)
@@ -35,13 +41,18 @@ Aplikasi absensi karyawan yang simpel dan sederhana
 ![Pengelolaan Lokasi](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_05.png)
 ![Pengelolaan Karyawan](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_06.png)
 
-## Screenshots User
+## Screenshots User 📱
 
 ![Login](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_01.png)
 ![Login Dashboard](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_07.png)
 ![Riwayat Absen](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_08.png)
 
-## License
+## Support 🍵
+
+Dukungan dalam rupiah:
+[trakteer.id](https://trakteer.id/dedyk-suntoro-atmojo/tip) 
+
+## License 🪪
 
 MIT License
 
