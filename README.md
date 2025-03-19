@@ -27,7 +27,14 @@ Aplikasi absensi karyawan
 - Jalankan aplikasi `flutter run`
 ## Screenshots
 
-https://github.com/dedyksuntoro/kehadiranmu/blob/master/screenshots/flutter_01.png
+https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_01.png
+https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_02.png
+https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_03.png
+https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_04.png
+https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_05.png
+https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_06.png
+https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_07.png
+https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_08.png
 
 ## License
 
