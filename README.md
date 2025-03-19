@@ -1,7 +1,7 @@
 
 # Kehadiranmu
 
-Aplikasi absensi karyawan
+Aplikasi absensi karyawan yang simpel dan sederhana
 
 
 ## Features Admin
@@ -25,9 +25,9 @@ Aplikasi absensi karyawan
 - Jangan lupa jalankan perintah `flutter pub get`
 - Edit `base_url.dart`, ganti `http://10.0.2.2` dengan url servermu
 - Jalankan aplikasi `flutter run`
-## Screenshots
 
-- Admin
+## Screenshots Admin
+
 ![Login](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_01.png)
 ![Rekap Absen](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_02.png)
 ![Map Absen](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_03.png)
@@ -35,7 +35,8 @@ Aplikasi absensi karyawan
 ![Pengelolaan Lokasi](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_05.png)
 ![Pengelolaan Karyawan](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_06.png)
 
-- User
+## Screenshots User
+
 ![Login Dashboard](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_07.png)
 ![Riwayat Absen](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_08.png)
 
