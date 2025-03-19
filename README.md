@@ -27,14 +27,17 @@ Aplikasi absensi karyawan
 - Jalankan aplikasi `flutter run`
 ## Screenshots
 
-https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_01.png
-https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_02.png
-https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_03.png
-https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_04.png
-https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_05.png
-https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_06.png
-https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_07.png
-https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_08.png
+- Admin
+![Login](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_01.png)
+![Rekap Absen](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_02.png)
+![Map Absen](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_03.png)
+![Pengelolaan Shift](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_04.png)
+![Pengelolaan Lokasi](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_05.png)
+![Pengelolaan Karyawan](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_06.png)
+
+- User
+![Login Dashboard](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_07.png)
+![Riwayat Absen](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_08.png)
 
 ## License
 
