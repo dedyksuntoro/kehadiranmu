@@ -37,6 +37,7 @@ Aplikasi absensi karyawan yang simpel dan sederhana
 
 ## Screenshots User
 
+![Login](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_01.png)
 ![Login Dashboard](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_07.png)
 ![Riwayat Absen](https://raw.githubusercontent.com/dedyksuntoro/kehadiranmu/refs/heads/master/screenshots/flutter_08.png)
 
